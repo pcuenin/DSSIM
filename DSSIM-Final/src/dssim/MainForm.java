@@ -813,8 +813,19 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
         Methods method2 = new Methods();
         
         //this is an attempt at fixing the bug of data not resetting. Yet it still doesn't reset
-        method2.ResetData();
-        
+        //method2.ResetData(data);
+        for(int i=0;i<stockArrayList.size();i++)
+        {   
+            String s = stockArrayList.get(i).getStockName();
+            final JTextField stockName = new JTextField(s);
+            final JTextField stockSymbol = new JTextField(stockArrayList.get(i).getSymbol());
+            final JTextField stockInitial = new JTextField(stockArrayList.get(i).getInitial());
+            int cnt=i;
+            stockArrayList.get(cnt).setStockName(stockName.getText());
+            stockArrayList.get(cnt).setStockSymbol(stockSymbol.getText());
+            stockArrayList.get(cnt).setStockInitial(stockInitial.getText());
+            stockArrayList.get(cnt).setAArg(stockSymbol.getText(), stockInitial.getText());
+        }
         //one improvement is to make things like Double.parseDouble(modelSettings.getFinalTime() static variables
         method2 = new Methods((ArrayList)stockArrayList, flowArrayList, variableArrayList, Double.parseDouble(modelSettings.getInitialTime())
                 ,Double.parseDouble(modelSettings.getFinalTime()),Double.parseDouble(modelSettings.getTimeStep()), methodChoice);
