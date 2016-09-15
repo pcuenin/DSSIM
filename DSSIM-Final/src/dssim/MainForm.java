@@ -403,7 +403,7 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
         showAllVariableBtn = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
-        arrowComboBox = new javax.swing.JComboBox<>();
+        arrowComboBox = new javax.swing.JComboBox<String>();
         jMenuBar1 = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         SaveMenuItem = new javax.swing.JMenuItem();
@@ -539,7 +539,7 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
         jSeparator4.setBackground(new java.awt.Color(51, 51, 51));
         jSeparator4.setForeground(new java.awt.Color(51, 51, 51));
 
-        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
+        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
         arrowComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 arrowComboBoxActionPerformed(evt);
@@ -594,7 +594,7 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(modelSettingsBtn)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(runSimBtn)
+                .addComponent(runSimBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(viewGraphButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -810,6 +810,7 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
 
     private void runSimBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSimBtnActionPerformed
 
+        
         Methods method2 = new Methods();
         
         //this is an attempt at fixing the bug of data not resetting. Yet it still doesn't reset
@@ -919,11 +920,18 @@ void AddVariable(String styleName, String inputName, String inputSymbol, String 
     private void modelSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modelSettingsBtnActionPerformed
         // TODO add your handling code here:
         //Creates a new JFrame that displays the GUI from ModelSettings.java class
-        JFrame jf=new JFrame();
-        jf.add(modelSettings);
-        jf.setSize(340,270);
-        jf.setVisible(true);
-        jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        
+        if (!modelSettings.isFrameAvailable())
+        {
+            JFrame jf=new JFrame();
+            jf.add(modelSettings);
+            modelSettings.setFrame(jf);
+            jf.setSize(340,270);
+            jf.setResizable(false);
+            jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        }
+        
+        modelSettings.getFrame().setVisible(true);
     }//GEN-LAST:event_modelSettingsBtnActionPerformed
 
     private void variableBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_variableBtnActionPerformed

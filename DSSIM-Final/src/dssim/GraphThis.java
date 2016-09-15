@@ -104,7 +104,7 @@ public class GraphThis extends ApplicationFrame {
             }
         });
         //add autozoom button
-        final JButton auto = new JButton(new AbstractAction("Auto Zoom") {
+        final JButton auto = new JButton(new AbstractAction("Reset Zoom") {
 
             @Override
             public void actionPerformed(ActionEvent e) {

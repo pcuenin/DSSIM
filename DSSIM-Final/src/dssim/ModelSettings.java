@@ -41,11 +41,27 @@ public class ModelSettings extends javax.swing.JPanel {
      */
     //Initial values for the inital time, final time, and time step variables
     public String initialTime = "0";
-    public String finalTime = "0";
-    public String timeStep = "0";
+    public String finalTime = "10";
+    public String timeStep = "1";
+    
+    JFrame frame = null;
     public ModelSettings() {
        
         initComponents();    
+    }
+    
+    public boolean isFrameAvailable()
+    {
+        return frame!=null;
+    }
+    public void setFrame(JFrame modelFrame)
+    {
+        frame = modelFrame;
+    }
+    
+    public JFrame getFrame()
+    {
+        return frame;
     }
     //Returns the text from the inital time text field to the MainForm
     public String getInitialTime()
@@ -167,6 +183,8 @@ public class ModelSettings extends javax.swing.JPanel {
         initialTime = initialTimeTField.getText();
         finalTime = finalTimeTField.getText();
         timeStep = timeStepTField.getText();
+        frame.setVisible(false);
+        
     }//GEN-LAST:event_saveBtnActionPerformed
 
     private void finalTimeTFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalTimeTFieldActionPerformed

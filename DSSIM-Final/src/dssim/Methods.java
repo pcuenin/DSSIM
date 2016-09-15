@@ -89,9 +89,8 @@ public final class Methods extends GraphObjects{
         return tableModel;
     }
     //this method is an attempt to reset data. doesnt help the bug yet...
-    public void ResetData(){
-            data = new XYSeriesCollection();
-    }public XYSeriesCollection rk4 (double t0, double tF, double step, ArrayList<Argument> argumentList,  ArrayList<Argument> variableArgList, ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList){
+    //public void ResetData(XYSeriesCollection reset){         }
+    public XYSeriesCollection rk4 (double t0, double tF, double step, ArrayList<Argument> argumentList,  ArrayList<Argument> variableArgList, ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList){
        
         //aVarList is an argument array that is created from the argument ArrayList given to it. 
         Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]); 
@@ -106,7 +105,7 @@ public final class Methods extends GraphObjects{
         for(int j = 0; j < aVarList.length; j++){
             aTempArgArrayList.add(aTempVarList[j]);
         }
-        //
+        
         double[] dydt = new double[argumentList.size()];
        
         ArrayList<Double> k1 = new ArrayList<Double>();
@@ -172,7 +171,11 @@ public final class Methods extends GraphObjects{
              //next let's find k2:
              for(int i=0;i<numOfStocks;i++){
                 
-                 value = (argumentList.get(i).getArgumentValue() + k1.get(i)/2);
+                 /*value = (argumentList.get(i).getArgumentValue() + k1.get(i)/2);
+                 aTempArgArrayList.get(i).setArgumentValue(value);
+                
+                dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);*/
+                 value = (argumentList.get(i).getArgumentValue() + step*k1.get(i)/2);
                  aTempArgArrayList.get(i).setArgumentValue(value);
                 
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
@@ -184,7 +187,7 @@ public final class Methods extends GraphObjects{
              //next let's find k3:
              for(int i=0;i<numOfStocks;i++){
                
-                 value = argumentList.get(i).getArgumentValue() + k2.get(i)/2;
+                 value = argumentList.get(i).getArgumentValue() + step*k2.get(i)/2;
                  aTempArgArrayList.get(i).setArgumentValue(value);
                  dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
              }
@@ -212,6 +215,7 @@ public final class Methods extends GraphObjects{
              }
              
              double x = n+1;
+             //gives x y values for each stock
              for(int i = 0; i < stockArrayList.size(); i++){
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
              }
@@ -322,7 +326,7 @@ public final class Methods extends GraphObjects{
                  
              }
              double x = n+1;
-             
+             //gives x y values for each stock
              for(int i = 0; i < stockArrayList.size(); i++){
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
              }
@@ -422,6 +426,7 @@ public final class Methods extends GraphObjects{
              }
              double x = n+1;
              
+             //gives x y values for each stock
              for(int i = 0; i < stockArrayList.size(); i++){
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
              }
@@ -448,7 +453,7 @@ public final class Methods extends GraphObjects{
         ArrayList<Argument> globalArgList = new ArrayList<Argument>();
         globalArgList.addAll(stockArgList);
         globalArgList.addAll(variableArgList);
-       Argument[] globalvariables = globalArgList.toArray(new Argument[globalArgList.size()]);
+        Argument[] globalvariables = globalArgList.toArray(new Argument[globalArgList.size()]);
 
         
         Expression e;
@@ -461,6 +466,8 @@ public final class Methods extends GraphObjects{
                 GraphObjects.FlowObject flow = flowArrayList.get(j);
              //Think about having general expressions passed to this loop, if you
              //can actually change parts of the expressions using e.whatever
+                
+                
                 e = new Expression(flow.getEquation(), globalvariables);
                 ret[i] = e.calculate();
 
