@@ -39,7 +39,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.mariuszgromada.math.mxparser.*;
 
 //The way mxparser is working is as follows: Argument data types take a symbol(that is lower case) and a double value number. 
-//          aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+//          aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
 //here is one way to instantiate your argument. It takes a string for the symbol, and a double value as the value. 
 //you can start an argument with a string for the value, but you will not be able to get an accurate value out of the argument return methods
 //the parser library has methods to get values from the argument objects. Very useful!
@@ -57,11 +57,11 @@ public class GraphObjects extends MainForm{
         
         
         public String sStockName; //for keeping the name given from the user
-        public String sSymbol; //for keeping the user entered symbol
-        public String sInitial; //for keeping the initial value the user enters
-        public Object oStock; //the JGraph object that is created by placing the object
-        public Argument aArg; //Argument data type is from the mxparser library
-        public String sJgraphName; //JGraph object name 
+        public String sStockSymbol; //for keeping the user entered symbol
+        public String sStockInitial; //for keeping the initial value the user enters
+        public Object oStockJgraph; //the JGraph object that is created by placing the object
+        public Argument aStockArg; //Argument data type is from the mxparser library
+        public String sStockJgraphName; //JGraph object name 
     
         //stock object is created for the purposes right now as a variable that is represented in the generated graphs and tables
         StockObject(Object graphobject, String inputname, String inputsymbol, String inputinitial){
@@ -69,20 +69,24 @@ public class GraphObjects extends MainForm{
             //stock name from user
             sStockName = inputname;
             //jgraph object cell name
-            sJgraphName = graphobject.toString();
+            sStockJgraphName = graphobject.toString();
             //stock symbol from user
-            sSymbol = inputsymbol;
+            sStockSymbol = inputsymbol;
             //stock initial value input from user. for reference later and building parser argument
-            sInitial = inputinitial;
+            sStockInitial = inputinitial;
             //object given from jgraph
-            oStock = graphobject;            
+            oStockJgraph = graphobject;            
             
-            aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+            aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
             
         }
+        //return stock arg of argument type
+        Argument getStockArg(){
+            return aStockArg;
+        }
         //sets the argument
-        void setAArg(String symbol, String initial){
-             aArg = new Argument(symbol, Double.parseDouble(initial));
+        void setStockArg(String symbol, String initial){
+             aStockArg = new Argument(symbol, Double.parseDouble(initial));
         }
         //sets gets the stock name
         String getStockName(){
@@ -92,61 +96,60 @@ public class GraphObjects extends MainForm{
         void setStockName(String newname){
             sStockName = newname;
         }
+        //get stock symbol
+        String getStockSymbol(){
+            return sStockSymbol;
+        }
         //set stock symbol
         void setStockSymbol(String newsymbol){
-            sSymbol = newsymbol;
+            sStockSymbol = newsymbol;
+        }
+        //return initial value as a string
+        String getStockInitial(){
+            return sStockInitial;
         }
         //set stock initial value
         void setStockInitial(String newinitial){
-            sInitial = newinitial;
+            sStockInitial = newinitial;
         }
         //returns the stock object of jgraph object type
         Object getStockObject(){
             
-            return oStock;
+            return oStockJgraph;
         }
         //returns the graph object name this and the stockobject builds a reference table 
         String getJgraphName(){
-            return sJgraphName;
+            return sStockJgraphName;
         }
-        //returns symbol
-        String getSymbol(){
-            return sSymbol;
-        }
-        //return stock arg of argument type
-        Argument getStockArg(){
-            return aArg;
-        }
-        //return initial value as a string
-        String getInitial(){
-            return sInitial;
-        }
+        
+        
+        
         
     }
     //all other objects are deviations of the stock
     //variables purpose is to allow ther user to enter numbers to be referenced but not to the generated graphs and tables
     public static class VariableObject{
         public String sVarName;
-        public String sSymbol;
-        public String sInitial;
+        public String sVarSymbol;
+        public String sVarInitial;
         public Object oVariable;
         //public String sEquation;
-        public Argument aArg;
-        public String sJgraphName;
+        public Argument aVarArg;
+        public String sVarJgraphName;
         
         VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial){
-            sJgraphName = graphobject.toString();
+            sVarJgraphName = graphobject.toString();
             sVarName = inputname;
-            sSymbol = inputsymbol;
-            sInitial = inputinitial;
+            sVarSymbol = inputsymbol;
+            sVarInitial = inputinitial;
             oVariable = graphobject;
             //will cause issue if user inputs into variable a string like "x*54"
             //may use if statement to check for what type of argument constructor to use to avoid errors
-            aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+            aVarArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
         }
 
         void setAArg(String symbol, String initial){
-             aArg = new Argument(symbol, Double.parseDouble(initial));
+             aVarArg = new Argument(symbol, Double.parseDouble(initial));
         }
         String getVarName(){
             return sVarName;
@@ -156,11 +159,11 @@ public class GraphObjects extends MainForm{
             sVarName = newname;
         }
         void setVarSymbol(String newsymbol){
-            sSymbol = newsymbol;
+            sVarSymbol = newsymbol;
         }
         void setVarInitial(String newinitial){
-            sInitial = newinitial;
-            setAArg(sSymbol, sInitial);
+            sVarInitial = newinitial;
+            setAArg(sVarSymbol, sVarInitial);
         }
         
      
@@ -170,17 +173,17 @@ public class GraphObjects extends MainForm{
             return oVariable;
         }
         String getJgraphName(){
-            return sJgraphName;
+            return sVarJgraphName;
         }
         String getSymbol(){
-            return sSymbol;
+            return sVarSymbol;
         }
         Argument getVarArg(){
-            return aArg;
+            return aVarArg;
         }
    
         String getInitial(){
-            return sInitial;
+            return sVarInitial;
         }
     }
     //the idea behind the flow object is that it allows a user to enter an equation that will be updating the values of the 
