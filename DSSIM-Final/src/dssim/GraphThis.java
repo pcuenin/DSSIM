@@ -27,7 +27,6 @@ package dssim;
  *
  * @author Lander University
  */
-
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -40,33 +39,31 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
 
-
-
 public class GraphThis extends ApplicationFrame {
-    
-    public GraphThis(final String title, XYSeriesCollection data, String graphTitle, String XTitle, String YTitle, final DefaultTableModel tableModel) {
+
+    public GraphThis(final String title, XYSeriesCollection data,
+            String graphTitle, String XTitle, String YTitle, final DefaultTableModel tableModel) {
 
         super(title);
         //make a new chart object
         final JFreeChart chart = ChartFactory.createXYLineChart(
-            graphTitle,
-            XTitle, 
-            YTitle, 
-            data,
-            PlotOrientation.VERTICAL,
-            true,
-            true,
-            false
+                graphTitle,
+                XTitle,
+                YTitle,
+                data,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
         );
-
 
         //create a panel to hold the chart
         final ChartPanel chartPanel = new ChartPanel(chart);
-        //create an overall frame
+        //create an overall frame for the chart
         JFrame frame = new JFrame(title);
         frame.setTitle(title);
         frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        frame.setLayout(new BorderLayout(0,5));
+        frame.setLayout(new BorderLayout(0, 5));
         frame.add(chartPanel, BorderLayout.CENTER);
         chartPanel.setMouseWheelEnabled(true);
         chartPanel.setHorizontalAxisTrace(true);
@@ -81,9 +78,9 @@ public class GraphThis extends ApplicationFrame {
 
         //open a table action
         toTable.addActionListener(new ActionListener() {
-         public void actionPerformed(ActionEvent e) {
-             Table table = new Table(tableModel);
-         }
+            public void actionPerformed(ActionEvent e) {
+                Table table = new Table(tableModel);
+            }
         });
         //turn trace on or off
         final String[] traceChoices = {"Enable Trace", "Disable Trace"};
@@ -104,20 +101,20 @@ public class GraphThis extends ApplicationFrame {
             }
         });
         //add autozoom button
-        final JButton auto = new JButton(new AbstractAction("Reset Zoom") {
+        final JButton auto = new JButton(new AbstractAction("Auto Zoom") {
 
             @Override
             public void actionPerformed(ActionEvent e) {
                 chartPanel.restoreAutoBounds();
             }
         });
-        
+
         panel.add(auto);
         //show everything together
         frame.add(panel, BorderLayout.SOUTH);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-        
-    } 
+
+    }
 }

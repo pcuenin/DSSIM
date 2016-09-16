@@ -23,7 +23,6 @@ package dssim;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /**
  *
  * @author Lander University
@@ -34,441 +33,421 @@ import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.mariuszgromada.math.mxparser.*;
+import dssim.gui.StockObject;
 
-public final class Methods extends GraphObjects{
-    
+public final class Methods extends GraphObjects {
+
     //this data type is from the jfreechart library
-    public  XYSeriesCollection data;
+    public XYSeriesCollection data;
     //as well as this one, this one allows an x y type table setup
-    public  DefaultTableModel tableModel  = new DefaultTableModel(0,2);
+    public DefaultTableModel tableModel = new DefaultTableModel(0, 2);
     //these array lists are instantiated here to be used as global values to be passed to the mainform
     public ArrayList<Argument> argumentList = new ArrayList<Argument>();
-    public ArrayList<Argument> variableArgList = new ArrayList<Argument>();   
+    public ArrayList<Argument> variableArgList = new ArrayList<Argument>();
     public ArrayList<Double> y0 = new ArrayList<Double>();
-    
-    
-    
-    public Methods(){}
-    
-    
-    public Methods(ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList, ArrayList<GraphObjects.VariableObject> variableArrayList, double t0, double tf, double step, String choice){
-        String columns[] =  {"X", "Y" };
-        tableModel.setColumnIdentifiers(columns);
-        
-        
-        GraphObjects.StockObject stock;
+
+    public Methods() {
+        // what is this doing? -PMC
+    }
+
+    public Methods(ArrayList<StockObject> stockArrayList,
+            ArrayList<GraphObjects.FlowObject> flowArrayList,
+            ArrayList<GraphObjects.VariableObject> variableArrayList, double t0,
+            double tf, double step, String choice) {
+        // label the string array for columns
+        String columns[] = {"X", "Y"};
+        tableModel.setColumnIdentifiers(columns); // set the labels
+
+        StockObject stock; 
         GraphObjects.VariableObject var;
-                
+
         //for each stock get the stock initial values and add to the argumentList
-        for (GraphObjects.StockObject stockArrayList1 : stockArrayList) {
-            stock = (GraphObjects.StockObject) stockArrayList1;
-            argumentList.add(stock.getStockArg());    
+        for (StockObject stockArrayList1 : stockArrayList) {
+            stock = (StockObject) stockArrayList1; //get initial value
+            argumentList.add(stock.getStockArg()); // add stock arge to argument list
         }
         //for each variable object, add to the argument array list for variables
         for (GraphObjects.VariableObject variableArrayList1 : variableArrayList) {
             var = (GraphObjects.VariableObject) variableArrayList1;
-            variableArgList.add(var.getVarArg());    
+            variableArgList.add(var.getVarArg());
         }
         //the user choice of numerical analysis method is sent to these if statements
-        if("rk4".equals(choice)){
-            data = rk4(t0,tf,step, argumentList, variableArgList, stockArrayList, flowArrayList);            
-        }       
-        else if("rk2".equals(choice)){
-          data = rk2(t0,tf,step, argumentList, variableArgList, stockArrayList, flowArrayList);
-        }
-        
-        else{
-            data = eulers(t0,tf,step, argumentList, variableArgList, stockArrayList, flowArrayList);
+        if ("rk4".equals(choice)) {
+            data = rk4(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
+        } else if ("rk2".equals(choice)) {
+            data = rk2(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
+        } else {
+            data = eulers(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
         }
     }
 
-    public XYSeriesCollection returnData(){
+    public XYSeriesCollection returnData() {
         return data;
     }
-    public DefaultTableModel getTable(){
+
+    public DefaultTableModel getTable() {
         return tableModel;
     }
+
     //this method is an attempt to reset data. doesnt help the bug yet...
-    //public void ResetData(XYSeriesCollection reset){         }
-    public XYSeriesCollection rk4 (double t0, double tF, double step, ArrayList<Argument> argumentList,  ArrayList<Argument> variableArgList, ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList){
-       
+    public void ResetData() {
+        data = new XYSeriesCollection();
+    }
+
+    public XYSeriesCollection rk4(double t0, double tF, double step, 
+            ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList,
+            ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+
         //aVarList is an argument array that is created from the argument ArrayList given to it. 
-        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]); 
+        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
         //aTempVarList only created to later create the temparg array list
         Argument[] aTempVarList = new Argument[argumentList.size()];
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF-t0)/step;
+        double numSteps = (tF - t0) / step;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
         }
-        
+        //
         double[] dydt = new double[argumentList.size()];
-       
+
         ArrayList<Double> k1 = new ArrayList<Double>();
-        
+
         ArrayList<Double> k2 = new ArrayList<Double>();
 
         ArrayList<Double> k3 = new ArrayList<Double>();
 
         ArrayList<Double> k4 = new ArrayList<Double>();
-        
+
         //idea is to set k1 through k4 ArrayLists to double values of 0
         //used to have stockArrayList.size()
-        for(int x = 0; x < stockArrayList.size(); x++){
+        for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
             k2.add(0.0);
             k3.add(0.0);
             k4.add(0.0);
         }
-       
+
         //array list length of amount of stocks
-        ArrayList<XYSeries> series = new ArrayList<XYSeries> ();
-        
-        
+        ArrayList<XYSeries> series = new ArrayList<XYSeries>();
+
         //create series to hold graph data
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
             series.add(tempSeries);
         }
-        
-        
+
         final XYSeriesCollection data = new XYSeriesCollection();
         //create strings to hold table data
-         ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-         String[] temp = {" ", " "};
-         for(int i = 0; i <= stockArrayList.size(); i++){
-             tableStrings.add(temp);
-         }
-         
+        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
+        String[] temp = {" ", " "};
+        for (int i = 0; i <= stockArrayList.size(); i++) {
+            tableStrings.add(temp);
+        }
+
         //add initial values to series
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             series.get(i).add(0, argumentList.get(i).getArgumentValue());
         }
-        
-         int numOfStocks = stockArrayList.size();
-         double value;
-         
-         
-         
-         
-        for(int n = 0; n < numSteps; n++){
-            
-            t = t0 + (n)*step;
 
-             //Let's find k1:
-             dydt = rhs(variableArgList, argumentList, flowArrayList);
-            
-             
-             for(int i=0; i<numOfStocks; i++){
-               
-                 k1.set(i, step*dydt[i]);
-             }
+        int numOfStocks = stockArrayList.size();
+        double value;
 
-             //next let's find k2:
-             for(int i=0;i<numOfStocks;i++){
-                
-                 /*value = (argumentList.get(i).getArgumentValue() + k1.get(i)/2);
-                 aTempArgArrayList.get(i).setArgumentValue(value);
-                
-                dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);*/
-                 value = (argumentList.get(i).getArgumentValue() + step*k1.get(i)/2);
-                 aTempArgArrayList.get(i).setArgumentValue(value);
-                
+        for (int n = 0; n < numSteps; n++) {
+
+            t = t0 + (n) * step;
+
+            //Let's find k1:
+            dydt = rhs(variableArgList, argumentList, flowArrayList);
+
+            for (int i = 0; i < numOfStocks; i++) {
+
+                k1.set(i, step * dydt[i]);
+            }
+
+            //next let's find k2:
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = (argumentList.get(i).getArgumentValue() + k1.get(i) / 2);
+                aTempArgArrayList.get(i).setArgumentValue(value);
+
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
-             }
-             for(int i=0; i<numOfStocks; i++){
-                k2.set(i, step*dydt[i]);
-             }
+            }
+            for (int i = 0; i < numOfStocks; i++) {
+                k2.set(i, step * dydt[i]);
+            }
 
-             //next let's find k3:
-             for(int i=0;i<numOfStocks;i++){
-               
-                 value = argumentList.get(i).getArgumentValue() + step*k2.get(i)/2;
-                 aTempArgArrayList.get(i).setArgumentValue(value);
-                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
-             }
-             for(int i=0; i<numOfStocks; i++){
-               k3.set(i, step*dydt[i]);
-             }
+            //next let's find k3:
+            for (int i = 0; i < numOfStocks; i++) {
 
-             //next let's find k4:
-             for(int i=0;i<numOfStocks;i++){
-               
-                 value = argumentList.get(i).getArgumentValue() + k3.get(i)/2;
-                 aTempArgArrayList.get(i).setArgumentValue(value);
-                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
-             }
-             for(int i=0; i<numOfStocks; i++){
-               k4.set(i, step*dydt[i]);
-             }
+                value = argumentList.get(i).getArgumentValue() + k2.get(i) / 2;
+                aTempArgArrayList.get(i).setArgumentValue(value);
+                dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
+            }
+            for (int i = 0; i < numOfStocks; i++) {
+                k3.set(i, step * dydt[i]);
+            }
 
-             //now we update y
-             for(int i=0; i<numOfStocks; i++){
-               
-                 value = argumentList.get(i).getArgumentValue() + (k1.get(i) + 2*k2.get(i) + 2*k3.get(i) + k4.get(i))/6;
-                 argumentList.get(i).setArgumentValue(value);
-                 
-             }
-             
-             double x = n+1;
-             //gives x y values for each stock
-             for(int i = 0; i < stockArrayList.size(); i++){
+            //next let's find k4:
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = argumentList.get(i).getArgumentValue() + k3.get(i) / 2;
+                aTempArgArrayList.get(i).setArgumentValue(value);
+                dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
+            }
+            for (int i = 0; i < numOfStocks; i++) {
+                k4.set(i, step * dydt[i]);
+            }
+
+            //now we update y
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = argumentList.get(i).getArgumentValue() + (k1.get(i) + 2 * k2.get(i) + 2 * k3.get(i) + k4.get(i)) / 6;
+                argumentList.get(i).setArgumentValue(value);
+
+            }
+
+            double x = n + 1;
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
-             }
-             
-            for(int i = 0; i < stockArrayList.size(); i++){
+            }
+
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 tableStrings.get(i)[0] = Double.toString(x);
                 tableStrings.get(i)[1] = Double.toString(argumentList.get(0).getArgumentValue());
                 tableModel.addRow(tableStrings.get(i));
-            }  
+            }
         }
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             data.addSeries(series.get(i));
         }
         return data;
     }
-    
-    public XYSeriesCollection rk2 (double t0, double tF, double step, ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList){
-        
+
+    public XYSeriesCollection rk2(double t0, double tF, double step, 
+            ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, 
+            ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+
         //Used to help create the tempvarlist
-        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]); 
+        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
         //aTempVarList only created to later create the temparg array list
         Argument[] aTempVarList = new Argument[argumentList.size()];
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF-t0)/step;
+        double numSteps = (tF - t0) / step;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
         }
         double[] dydt = new double[argumentList.size()];
-       
+
         ArrayList<Double> k1 = new ArrayList<Double>();
-        
+
         ArrayList<Double> k2 = new ArrayList<Double>();
 
         ArrayList<Double> k3 = new ArrayList<Double>();
 
         ArrayList<Double> k4 = new ArrayList<Double>();
-        
+
         //idea is to set k1 through k4 ArrayLists to double values of 0
         //used to have stockArrayList.size()
-        for(int x = 0; x < stockArrayList.size(); x++){
+        for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
             k2.add(0.0);
             k3.add(0.0);
             k4.add(0.0);
         }
-       
+
         //array list length of amount of stocks
-        ArrayList<XYSeries> series = new ArrayList<XYSeries> ();
-        
-        
+        ArrayList<XYSeries> series = new ArrayList<XYSeries>();
+
         //create series to hold graph data
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
             series.add(tempSeries);
         }
-        
-        
+
         final XYSeriesCollection data = new XYSeriesCollection();
         //create strings to hold table data
-         ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-         String[] temp = {" ", " "};
-         for(int i = 0; i <= stockArrayList.size(); i++){
-             tableStrings.add(temp);
-         }
-         
+        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
+        String[] temp = {" ", " "};
+        for (int i = 0; i <= stockArrayList.size(); i++) {
+            tableStrings.add(temp);
+        }
+
         //add initial values to series
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             series.get(i).add(0, argumentList.get(i).getArgumentValue());
         }
-        
-         int numOfStocks = stockArrayList.size();
-         double value;
-         
-         
-         
-         
-        for(int n = 0; n < numSteps; n++){
-             t = t0 + (n)*step;
 
-             //Let's find k1:
-             dydt = rhs(variableArgList, argumentList, flowArrayList);
-            
-             
-             for(int i=0; i<numOfStocks; i++){
-               
-                 k1.set(i, step*dydt[i]);
-             }
+        int numOfStocks = stockArrayList.size();
+        double value;
 
-             //next let's find k2:
-             for(int i=0;i<numOfStocks;i++){
-                
-                 value = (argumentList.get(i).getArgumentValue() + k1.get(i)/2);
-                 aTempArgArrayList.get(i).setArgumentValue(value);
-                
+        for (int n = 0; n < numSteps; n++) {
+            t = t0 + (n) * step;
+
+            //Let's find k1:
+            dydt = rhs(variableArgList, argumentList, flowArrayList);
+
+            for (int i = 0; i < numOfStocks; i++) {
+
+                k1.set(i, step * dydt[i]);
+            }
+
+            //next let's find k2:
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = (argumentList.get(i).getArgumentValue() + k1.get(i) / 2);
+                aTempArgArrayList.get(i).setArgumentValue(value);
+
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
-             }
-             for(int i=0; i<numOfStocks; i++){
-                k2.set(i, step*dydt[i]);
-             }
-             for(int i=0; i<numOfStocks; i++){
-               
-                 value = argumentList.get(i).getArgumentValue() + (k1.get(i) + k2.get(i)/2);
-                 argumentList.get(i).setArgumentValue(value);
-                 
-             }
-             double x = n+1;
-             //gives x y values for each stock
-             for(int i = 0; i < stockArrayList.size(); i++){
+            }
+            for (int i = 0; i < numOfStocks; i++) {
+                k2.set(i, step * dydt[i]);
+            }
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = argumentList.get(i).getArgumentValue() + (k1.get(i) + k2.get(i) / 2);
+                argumentList.get(i).setArgumentValue(value);
+
+            }
+            double x = n + 1;
+
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
-             }
-             
-            for(int i = 0; i < stockArrayList.size(); i++){
+            }
+
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 tableStrings.get(i)[0] = Double.toString(x);
                 tableStrings.get(i)[1] = Double.toString(argumentList.get(0).getArgumentValue());
                 tableModel.addRow(tableStrings.get(i));
-            }  
+            }
         }
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             data.addSeries(series.get(i));
         }
         return data;
     }
-    
-    public XYSeriesCollection eulers (double t0, double tF, double step, ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, ArrayList<GraphObjects.StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList){
-        
+
+    public XYSeriesCollection eulers(double t0, double tF, double step, ArrayList<Argument> argumentList,
+            ArrayList<Argument> variableArgList, ArrayList<StockObject> stockArrayList, 
+            ArrayList<GraphObjects.FlowObject> flowArrayList) {
+
         //Used to help create the tempvarlist
-        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]); 
+        Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
         //aTempVarList only created to later create the temparg array list
         Argument[] aTempVarList = new Argument[argumentList.size()];
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF-t0)/step;
+        double numSteps = (tF - t0) / step;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
-        for(int j = 0; j < aVarList.length; j++){
+        for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
         }
         double[] dydt = new double[argumentList.size()];
-       
+
         ArrayList<Double> k1 = new ArrayList<Double>();
-        
+
         ArrayList<Double> k2 = new ArrayList<Double>();
 
         ArrayList<Double> k3 = new ArrayList<Double>();
 
         ArrayList<Double> k4 = new ArrayList<Double>();
-        
+
         //idea is to set k1 through k4 ArrayLists to double values of 0
-        for(int x = 0; x < stockArrayList.size(); x++){
+        for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
             k2.add(0.0);
             k3.add(0.0);
             k4.add(0.0);
         }
-       
-       //array list length of amount of stocks
-        ArrayList<XYSeries> series = new ArrayList<XYSeries> ();
-        
-        
+
+        //array list length of amount of stocks
+        ArrayList<XYSeries> series = new ArrayList<XYSeries>();
+
         //create series to hold graph data
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
             series.add(tempSeries);
         }
-        
-        
+
         final XYSeriesCollection data = new XYSeriesCollection();
         //create strings to hold table data
-         ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-         String[] temp = {" ", " "};
-         for(int i = 0; i <= stockArrayList.size(); i++){
-             tableStrings.add(temp);
-         }
-         
+        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
+        String[] temp = {" ", " "};
+        for (int i = 0; i <= stockArrayList.size(); i++) {
+            tableStrings.add(temp);
+        }
+
         //add initial values to series
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             series.get(i).add(0, argumentList.get(i).getArgumentValue());
         }
-         int numOfStocks = stockArrayList.size();
-         double value;
-         
-         
-         
-         
-        for(int n = 0; n < numSteps; n++){
-             t = t0 + (n)*step;
+        int numOfStocks = stockArrayList.size();
+        double value;
 
-             //Let's find k1:
-             dydt = rhs(variableArgList, argumentList, flowArrayList);
-            
-             
-             for(int i=0; i<numOfStocks; i++){
-               
-                 k1.set(i, step*dydt[i]);
-             }
+        for (int n = 0; n < numSteps; n++) {
+            t = t0 + (n) * step;
 
-             
-             for(int i=0; i<numOfStocks; i++){
-               
-                 value = argumentList.get(i).getArgumentValue() + (k1.get(i));
-                 argumentList.get(i).setArgumentValue(value);
-                 
-             }
-             double x = n+1;
-             
-             //gives x y values for each stock
-             for(int i = 0; i < stockArrayList.size(); i++){
+            //Let's find k1:
+            dydt = rhs(variableArgList, argumentList, flowArrayList);
+
+            for (int i = 0; i < numOfStocks; i++) {
+
+                k1.set(i, step * dydt[i]);
+            }
+
+            for (int i = 0; i < numOfStocks; i++) {
+
+                value = argumentList.get(i).getArgumentValue() + (k1.get(i));
+                argumentList.get(i).setArgumentValue(value);
+
+            }
+            double x = n + 1;
+
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 series.get(i).add(x, argumentList.get(i).getArgumentValue());
-             }
-             
-            for(int i = 0; i < stockArrayList.size(); i++){
+            }
+
+            for (int i = 0; i < stockArrayList.size(); i++) {
                 tableStrings.get(i)[0] = Double.toString(x);
                 tableStrings.get(i)[1] = Double.toString(argumentList.get(0).getArgumentValue());
                 tableModel.addRow(tableStrings.get(i));
-            }  
+            }
         }
-        for(int i = 0; i < stockArrayList.size(); i++){
+        for (int i = 0; i < stockArrayList.size(); i++) {
             data.addSeries(series.get(i));
         }
         return data;
     }
 
-    
+    public double[] rhs(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
 
-    public double[] rhs(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<GraphObjects.FlowObject> flowArrayList){
-        
         //set double array of size of stockArrayList
         double[] ret = new double[stockArgList.size()];
-        
+
         ArrayList<Argument> globalArgList = new ArrayList<Argument>();
         globalArgList.addAll(stockArgList);
         globalArgList.addAll(variableArgList);
         Argument[] globalvariables = globalArgList.toArray(new Argument[globalArgList.size()]);
 
-        
         Expression e;
         //for how ever many stocks there are, you get each stock and find the solution to each equation from the stock using
         // the variables array. it then returns that to the double ret array at the appropriate index
-        for(int j = 0; j < flowArrayList.size(); j++){
-            
-            
-            for(int i = 0; i < stockArgList.size(); i++){
+        for (int j = 0; j < flowArrayList.size(); j++) {
+
+            for (int i = 0; i < stockArgList.size(); i++) {
                 GraphObjects.FlowObject flow = flowArrayList.get(j);
-             //Think about having general expressions passed to this loop, if you
-             //can actually change parts of the expressions using e.whatever
-                
-                
-                e = new Expression(flow.getEquation(), globalvariables);
+                //Think about having general expressions passed to this loop, if you
+                //can actually change parts of the expressions using e.whatever
+                e = new Expression(flow.getflowEquation(), globalvariables);
                 ret[i] = e.calculate();
 
             }

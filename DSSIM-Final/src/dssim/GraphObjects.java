@@ -23,12 +23,10 @@ package dssim;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /**
  *
  * @author Lander University
  */
-
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
@@ -39,216 +37,164 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.mariuszgromada.math.mxparser.*;
 
 //The way mxparser is working is as follows: Argument data types take a symbol(that is lower case) and a double value number. 
-//          aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+//          aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
 //here is one way to instantiate your argument. It takes a string for the symbol, and a double value as the value. 
 //you can start an argument with a string for the value, but you will not be able to get an accurate value out of the argument return methods
 //the parser library has methods to get values from the argument objects. Very useful!
-
-public class GraphObjects extends MainForm{
+public class GraphObjects extends MainForm {
 
 //posy and posx are for later use with position being saved to the objects    
     int posx;
     int posy;
-    
-    
-    
+
     //Stockobject is the general class for all stocks created
-    public static class StockObject{
-        
-        
-        public String sStockName; //for keeping the name given from the user
-        public String sSymbol; //for keeping the user entered symbol
-        public String sInitial; //for keeping the initial value the user enters
-        public Object oStock; //the JGraph object that is created by placing the object
-        public Argument aArg; //Argument data type is from the mxparser library
-        public String sJgraphName; //JGraph object name 
+    // try to make stockobject seperate class
     
-        //stock object is created for the purposes right now as a variable that is represented in the generated graphs and tables
-        StockObject(Object graphobject, String inputname, String inputsymbol, String inputinitial){
-            
-            //stock name from user
-            sStockName = inputname;
-            //jgraph object cell name
-            sJgraphName = graphobject.toString();
-            //stock symbol from user
-            sSymbol = inputsymbol;
-            //stock initial value input from user. for reference later and building parser argument
-            sInitial = inputinitial;
-            //object given from jgraph
-            oStock = graphobject;            
-            
-            aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
-            
-        }
-        //sets the argument
-        void setAArg(String symbol, String initial){
-             aArg = new Argument(symbol, Double.parseDouble(initial));
-        }
-        //sets gets the stock name
-        String getStockName(){
-            return sStockName;
-        }
-        //for use by mainform class
-        void setStockName(String newname){
-            sStockName = newname;
-        }
-        //set stock symbol
-        void setStockSymbol(String newsymbol){
-            sSymbol = newsymbol;
-        }
-        //set stock initial value
-        void setStockInitial(String newinitial){
-            sInitial = newinitial;
-        }
-        //returns the stock object of jgraph object type
-        Object getStockObject(){
-            
-            return oStock;
-        }
-        //returns the graph object name this and the stockobject builds a reference table 
-        String getJgraphName(){
-            return sJgraphName;
-        }
-        //returns symbol
-        String getSymbol(){
-            return sSymbol;
-        }
-        //return stock arg of argument type
-        Argument getStockArg(){
-            return aArg;
-        }
-        //return initial value as a string
-        String getInitial(){
-            return sInitial;
-        }
-        
-    }
+
     //all other objects are deviations of the stock
     //variables purpose is to allow ther user to enter numbers to be referenced but not to the generated graphs and tables
-    public static class VariableObject{
+    public static class VariableObject {
+
         public String sVarName;
-        public String sSymbol;
-        public String sInitial;
+        public String sVarSymbol;
+        public String sVarInitial;
         public Object oVariable;
-        //public String sEquation;
-        public Argument aArg;
-        public String sJgraphName;
-        
-        VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial){
-            sJgraphName = graphobject.toString();
+        //public String sFlowEquation;
+        public Argument aVarArg;
+        public String sVarJgraphName;
+
+        VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
+            sVarJgraphName = graphobject.toString();
             sVarName = inputname;
-            sSymbol = inputsymbol;
-            sInitial = inputinitial;
+            sVarSymbol = inputsymbol;
+            sVarInitial = inputinitial;
             oVariable = graphobject;
             //will cause issue if user inputs into variable a string like "x*54"
             //may use if statement to check for what type of argument constructor to use to avoid errors
-            aArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+            aVarArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
         }
 
-        void setAArg(String symbol, String initial){
-             aArg = new Argument(symbol, Double.parseDouble(initial));
+        Argument getVarArg() {
+            return aVarArg;
         }
-        String getVarName(){
+
+        void setVarArg(String symbol, String initial) {
+            aVarArg = new Argument(symbol, Double.parseDouble(initial));
+        }
+
+        String getVarName() {
             return sVarName;
         }
+
         //for use later by gui
-        void setVarName(String newname){
+        void setVarName(String newname) {
             sVarName = newname;
         }
-        void setVarSymbol(String newsymbol){
-            sSymbol = newsymbol;
+
+        String getVarSymbol() {
+            return sVarSymbol;
         }
-        void setVarInitial(String newinitial){
-            sInitial = newinitial;
-            setAArg(sSymbol, sInitial);
+
+        void setVarSymbol(String newsymbol) {
+            sVarSymbol = newsymbol;
         }
-        
-     
-        
-        Object getVarObject(){
-            
+
+        String getVarInitial() {
+            return sVarInitial;
+        }
+
+        void setVarInitial(String newinitial) {
+            sVarInitial = newinitial;
+            setVarArg(sVarSymbol, sVarInitial);
+        }
+
+        Object getVarObject() {
+
             return oVariable;
         }
-        String getJgraphName(){
-            return sJgraphName;
+
+        String getJgraphName() {
+            return sVarJgraphName;
         }
-        String getSymbol(){
-            return sSymbol;
-        }
-        Argument getVarArg(){
-            return aArg;
-        }
-   
-        String getInitial(){
-            return sInitial;
-        }
+
     }
+
     //the idea behind the flow object is that it allows a user to enter an equation that will be updating the values of the 
     //stocks on the generated graphs and tables
-    public static class FlowObject{
+    public static class FlowObject {
+
         public String sFlowName;
-        public String sSymbol;
+        public String sFlowSymbol;
         public Object oFlow;
-        public String sEquation;
-        public String sJgraphName;
-        
-        FlowObject(Object graphobject, String inputname, String inputequation){
-            
+        public String sFlowEquation;
+        public String sFlowJgraphName;
+
+        FlowObject(Object graphobject, String inputname, String inputequation) {
+
             //flow name from user
             sFlowName = inputname;
             //jgraph object cell name
-            sJgraphName = graphobject.toString();                   
+            sFlowJgraphName = graphobject.toString();
             //object given from jgraph
             oFlow = graphobject;
             //input equation from user. for rhs data building later
-            sEquation = inputequation;
-            
-            
+            sFlowEquation = inputequation;
+
         }
-        
-        String getFlowName(){
+
+        String getFlowName() {
             return sFlowName;
         }
+
         //for use later by gui
-        void setFlowName(String newname){
+        void setFlowName(String newname) {
             sFlowName = newname;
         }
-        Object getFlowObject(){
-            
+
+        Object getFlowObject() {
+
             return oFlow;
         }
-        String getJgraphName(){
-            return sJgraphName;
+
+        String getFlowJgraphName() {
+            return sFlowJgraphName;
         }
-        String getEquation(){
-            return sEquation;
+
+        String getflowEquation() {
+            return sFlowEquation;
         }
-        void setEquation(String newequation){
-            sEquation = newequation;
+
+        void setFlowEquation(String newequation) {
+            sFlowEquation = newequation;
         }
     }
+
     //arrows right now in this version are purely visual. They do not allow the user to see the model objects available to
     //use in aspects of the model. Later versions will implement the use of local variables associated with specific models aspects
-    public static class ArrowObject{
+    public static class ArrowObject {
+
         public String sArrowName;
         public Object oArrow;
-        public String sJgraphName;
-        ArrowObject(String inputname, Object graphobject){
+        public String sArrowJgraphName;
+
+        ArrowObject(String inputname, Object graphobject) {
             sArrowName = inputname;
-            sJgraphName = graphobject.toString();
+            sArrowJgraphName = graphobject.toString();
             oArrow = graphobject;
-            
+
         }
-        String getArrowName(){
+
+        String getArrowName() {
             return sArrowName;
         }
-        void setArrowName(String newname){
+
+        void setArrowName(String newname) {
             sArrowName = newname;
         }
-        String getJgraphName(){
-            return sJgraphName;
+
+        String getArrowJgraphName() {
+            return sArrowJgraphName;
         }
     }
-    
-    
+
 }
