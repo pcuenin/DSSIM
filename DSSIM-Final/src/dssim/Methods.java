@@ -28,12 +28,14 @@ package dssim;
  * @author Lander University
  */
 import dssim.GraphObjects;
+import dssim.gui.FlowObject;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import org.mariuszgromada.math.mxparser.*;
 import dssim.gui.StockObject;
+import dssim.gui.VariableObject;
 
 public final class Methods extends GraphObjects {
 
@@ -51,15 +53,15 @@ public final class Methods extends GraphObjects {
     }
 
     public Methods(ArrayList<StockObject> stockArrayList,
-            ArrayList<GraphObjects.FlowObject> flowArrayList,
-            ArrayList<GraphObjects.VariableObject> variableArrayList, double t0,
+            ArrayList<FlowObject> flowArrayList,
+            ArrayList<VariableObject> variableArrayList, double t0,
             double tf, double step, String choice) {
         // label the string array for columns
         String columns[] = {"X", "Y"};
         tableModel.setColumnIdentifiers(columns); // set the labels
 
         StockObject stock; 
-        GraphObjects.VariableObject var;
+        VariableObject var;
 
         //for each stock get the stock initial values and add to the argumentList
         for (StockObject stockArrayList1 : stockArrayList) {
@@ -67,8 +69,8 @@ public final class Methods extends GraphObjects {
             argumentList.add(stock.getStockArg()); // add stock arge to argument list
         }
         //for each variable object, add to the argument array list for variables
-        for (GraphObjects.VariableObject variableArrayList1 : variableArrayList) {
-            var = (GraphObjects.VariableObject) variableArrayList1;
+        for (VariableObject variableArrayList1 : variableArrayList) {
+            var = (VariableObject) variableArrayList1;
             variableArgList.add(var.getVarArg());
         }
         //the user choice of numerical analysis method is sent to these if statements
@@ -96,7 +98,7 @@ public final class Methods extends GraphObjects {
 
     public XYSeriesCollection rk4(double t0, double tF, double step, 
             ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList,
-            ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+            ArrayList<StockObject> stockArrayList, ArrayList<FlowObject> flowArrayList) {
 
         //aVarList is an argument array that is created from the argument ArrayList given to it. 
         Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
@@ -229,7 +231,7 @@ public final class Methods extends GraphObjects {
 
     public XYSeriesCollection rk2(double t0, double tF, double step, 
             ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, 
-            ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+            ArrayList<StockObject> stockArrayList, ArrayList<FlowObject> flowArrayList) {
 
         //Used to help create the tempvarlist
         Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
@@ -336,7 +338,7 @@ public final class Methods extends GraphObjects {
 
     public XYSeriesCollection eulers(double t0, double tF, double step, ArrayList<Argument> argumentList,
             ArrayList<Argument> variableArgList, ArrayList<StockObject> stockArrayList, 
-            ArrayList<GraphObjects.FlowObject> flowArrayList) {
+            ArrayList<FlowObject> flowArrayList) {
 
         //Used to help create the tempvarlist
         Argument[] aVarList = argumentList.toArray(new Argument[argumentList.size()]);
@@ -428,7 +430,7 @@ public final class Methods extends GraphObjects {
         return data;
     }
 
-    public double[] rhs(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+    public double[] rhs(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<FlowObject> flowArrayList) {
 
         //set double array of size of stockArrayList
         double[] ret = new double[stockArgList.size()];
@@ -444,7 +446,7 @@ public final class Methods extends GraphObjects {
         for (int j = 0; j < flowArrayList.size(); j++) {
 
             for (int i = 0; i < stockArgList.size(); i++) {
-                GraphObjects.FlowObject flow = flowArrayList.get(j);
+                FlowObject flow = flowArrayList.get(j);
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
                 e = new Expression(flow.getflowEquation(), globalvariables);

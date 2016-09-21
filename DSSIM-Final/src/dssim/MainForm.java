@@ -30,6 +30,8 @@ package dssim;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
+import dssim.gui.ArrowObject;
+import dssim.gui.FlowObject;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,6 +51,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeriesCollection;
 import dssim.gui.StockObject;
+import dssim.gui.VariableObject;
 
 public class MainForm extends javax.swing.JFrame {
 
@@ -78,9 +81,9 @@ public class MainForm extends javax.swing.JFrame {
      another method could be to keep track
      by using a hashtable. Yet, arraylists have very useful methods. */
     public ArrayList<StockObject> stockArrayList = new ArrayList<StockObject>();
-    public ArrayList<GraphObjects.FlowObject> flowArrayList = new ArrayList<GraphObjects.FlowObject>();
-    public ArrayList<GraphObjects.VariableObject> variableArrayList = new ArrayList<GraphObjects.VariableObject>();
-    public ArrayList<GraphObjects.ArrowObject> arrowArrayList = new ArrayList<GraphObjects.ArrowObject>();
+    public ArrayList<FlowObject> flowArrayList = new ArrayList<FlowObject>();
+    public ArrayList<VariableObject> variableArrayList = new ArrayList<VariableObject>();
+    public ArrayList<ArrowObject> arrowArrayList = new ArrayList<ArrowObject>();
 
     /**
      * Creates new form MainForm
@@ -202,7 +205,7 @@ public class MainForm extends javax.swing.JFrame {
         try {
             //flowObject is added to the flowArrayList
             Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-            GraphObjects.FlowObject flowobject = new GraphObjects.FlowObject(node, inputname, inputequation);
+            FlowObject flowobject = new FlowObject(node, inputname, inputequation);
             flowArrayList.add(flowobject);
         } finally {
             graph.getModel().endUpdate();
@@ -341,7 +344,7 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().beginUpdate();
         try {
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
-            GraphObjects.VariableObject variableobject = new GraphObjects.VariableObject(node, inputName, 
+            VariableObject variableobject = new VariableObject(node, inputName, 
                     inputSymbol, inputInitial);
             variableArrayList.add(variableobject);
         } finally {
@@ -378,7 +381,7 @@ public class MainForm extends javax.swing.JFrame {
         showAllVariableBtn = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
-        arrowComboBox = new javax.swing.JComboBox<>();
+        arrowComboBox = new javax.swing.JComboBox<String>();
         jMenuBar1 = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         SaveMenuItem = new javax.swing.JMenuItem();
@@ -416,7 +419,6 @@ public class MainForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
         jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
 
@@ -514,7 +516,7 @@ public class MainForm extends javax.swing.JFrame {
         jSeparator4.setBackground(new java.awt.Color(51, 51, 51));
         jSeparator4.setForeground(new java.awt.Color(51, 51, 51));
 
-        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
+        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
         arrowComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 arrowComboBoxActionPerformed(evt);
@@ -529,7 +531,7 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(closeBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                    .addComponent(closeBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(showAllVariableBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(methodChoiceCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(viewTableButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -582,7 +584,7 @@ public class MainForm extends javax.swing.JFrame {
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(showAllVariableBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)

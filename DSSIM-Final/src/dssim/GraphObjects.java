@@ -1,5 +1,8 @@
 package dssim;
 
+
+// we can probably delete this file - PMC
+
 /*
  * The MIT License
  *
@@ -44,8 +47,8 @@ import org.mariuszgromada.math.mxparser.*;
 public class GraphObjects extends MainForm {
 
 //posy and posx are for later use with position being saved to the objects    
-    int posx;
-    int posy;
+    //int posx;
+    //int posy;
 
     //Stockobject is the general class for all stocks created
     // try to make stockobject seperate class
@@ -53,7 +56,7 @@ public class GraphObjects extends MainForm {
 
     //all other objects are deviations of the stock
     //variables purpose is to allow ther user to enter numbers to be referenced but not to the generated graphs and tables
-    public static class VariableObject {
+    /*public static class VariableObject {
 
         public String sVarName;
         public String sVarSymbol;
@@ -117,11 +120,11 @@ public class GraphObjects extends MainForm {
             return sVarJgraphName;
         }
 
-    }
+    }*/
 
     //the idea behind the flow object is that it allows a user to enter an equation that will be updating the values of the 
     //stocks on the generated graphs and tables
-    public static class FlowObject {
+    /*public static class FlowObject {
 
         public String sFlowName;
         public String sFlowSymbol;
@@ -167,11 +170,11 @@ public class GraphObjects extends MainForm {
         void setFlowEquation(String newequation) {
             sFlowEquation = newequation;
         }
-    }
+    }*/
 
     //arrows right now in this version are purely visual. They do not allow the user to see the model objects available to
     //use in aspects of the model. Later versions will implement the use of local variables associated with specific models aspects
-    public static class ArrowObject {
+    /*public static class ArrowObject {
 
         public String sArrowName;
         public Object oArrow;
@@ -195,6 +198,6 @@ public class GraphObjects extends MainForm {
         String getArrowJgraphName() {
             return sArrowJgraphName;
         }
-    }
+    }*/
 
 }
