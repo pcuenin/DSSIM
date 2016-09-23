@@ -896,11 +896,18 @@ public class MainForm extends javax.swing.JFrame {
     private void modelSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modelSettingsBtnActionPerformed
         // TODO add your handling code here:
         //Creates a new JFrame that displays the GUI from ModelSettings.java class
-        JFrame jf = new JFrame();
-        jf.add(modelSettings);
-        jf.setSize(340, 270);
-        jf.setVisible(true);
-        jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        
+        if (!modelSettings.isFrameAvailable())
+        {
+            JFrame jf=new JFrame();
+            jf.add(modelSettings);
+            modelSettings.setFrame(jf);
+            jf.setSize(340,270);
+            jf.setResizable(false);
+            jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        }
+        
+        modelSettings.getFrame().setVisible(true);
     }//GEN-LAST:event_modelSettingsBtnActionPerformed
 
     private void variableBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_variableBtnActionPerformed

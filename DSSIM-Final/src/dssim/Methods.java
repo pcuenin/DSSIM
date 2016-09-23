@@ -53,7 +53,7 @@ public final class Methods extends GraphObjects {
     public Methods(ArrayList<StockObject> stockArrayList,
             ArrayList<GraphObjects.FlowObject> flowArrayList,
             ArrayList<GraphObjects.VariableObject> variableArrayList, double t0,
-            double tf, double step, String choice) {
+            double tf, double stepSize, String choice) {
         // label the string array for columns
         String columns[] = {"X", "Y"};
         tableModel.setColumnIdentifiers(columns); // set the labels
@@ -73,11 +73,11 @@ public final class Methods extends GraphObjects {
         }
         //the user choice of numerical analysis method is sent to these if statements
         if ("rk4".equals(choice)) {
-            data = rk4(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
+            data = rk4(t0, tf, stepSize, argumentList, variableArgList, stockArrayList, flowArrayList);
         } else if ("rk2".equals(choice)) {
-            data = rk2(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
+            data = rk2(t0, tf, stepSize, argumentList, variableArgList, stockArrayList, flowArrayList);
         } else {
-            data = eulers(t0, tf, step, argumentList, variableArgList, stockArrayList, flowArrayList);
+            data = eulers(t0, tf, stepSize, argumentList, variableArgList, stockArrayList, flowArrayList);
         }
     }
 
@@ -90,11 +90,11 @@ public final class Methods extends GraphObjects {
     }
 
     //this method is an attempt to reset data. doesnt help the bug yet...
-    public void ResetData() {
+    /*public void ResetData() {
         data = new XYSeriesCollection();
-    }
+    }/*/
 
-    public XYSeriesCollection rk4(double t0, double tF, double step, 
+    public XYSeriesCollection rk4(double t0, double tF, double stepSize, 
             ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList,
             ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
 
@@ -105,7 +105,7 @@ public final class Methods extends GraphObjects {
         for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF - t0) / step;
+        double numSteps = (tF - t0) / stepSize;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
@@ -158,14 +158,14 @@ public final class Methods extends GraphObjects {
 
         for (int n = 0; n < numSteps; n++) {
 
-            t = t0 + (n) * step;
+            t = t0 + (n) * stepSize;
 
             //Let's find k1:
             dydt = rhs(variableArgList, argumentList, flowArrayList);
 
             for (int i = 0; i < numOfStocks; i++) {
 
-                k1.set(i, step * dydt[i]);
+                k1.set(i, stepSize * dydt[i]);
             }
 
             //next let's find k2:
@@ -177,7 +177,7 @@ public final class Methods extends GraphObjects {
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
             }
             for (int i = 0; i < numOfStocks; i++) {
-                k2.set(i, step * dydt[i]);
+                k2.set(i, stepSize * dydt[i]);
             }
 
             //next let's find k3:
@@ -188,7 +188,7 @@ public final class Methods extends GraphObjects {
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
             }
             for (int i = 0; i < numOfStocks; i++) {
-                k3.set(i, step * dydt[i]);
+                k3.set(i, stepSize * dydt[i]);
             }
 
             //next let's find k4:
@@ -199,7 +199,7 @@ public final class Methods extends GraphObjects {
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
             }
             for (int i = 0; i < numOfStocks; i++) {
-                k4.set(i, step * dydt[i]);
+                k4.set(i, stepSize * dydt[i]);
             }
 
             //now we update y
@@ -227,7 +227,7 @@ public final class Methods extends GraphObjects {
         return data;
     }
 
-    public XYSeriesCollection rk2(double t0, double tF, double step, 
+    public XYSeriesCollection rk2(double t0, double tF, double stepSize, 
             ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, 
             ArrayList<StockObject> stockArrayList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
 
@@ -238,7 +238,7 @@ public final class Methods extends GraphObjects {
         for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF - t0) / step;
+        double numSteps = (tF - t0) / stepSize;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
@@ -250,17 +250,11 @@ public final class Methods extends GraphObjects {
 
         ArrayList<Double> k2 = new ArrayList<Double>();
 
-        ArrayList<Double> k3 = new ArrayList<Double>();
-
-        ArrayList<Double> k4 = new ArrayList<Double>();
-
         //idea is to set k1 through k4 ArrayLists to double values of 0
         //used to have stockArrayList.size()
         for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
             k2.add(0.0);
-            k3.add(0.0);
-            k4.add(0.0);
         }
 
         //array list length of amount of stocks
@@ -289,14 +283,14 @@ public final class Methods extends GraphObjects {
         double value;
 
         for (int n = 0; n < numSteps; n++) {
-            t = t0 + (n) * step;
+            t = t0 + (n) * stepSize;
 
             //Let's find k1:
             dydt = rhs(variableArgList, argumentList, flowArrayList);
 
             for (int i = 0; i < numOfStocks; i++) {
 
-                k1.set(i, step * dydt[i]);
+                k1.set(i, stepSize * dydt[i]);
             }
 
             //next let's find k2:
@@ -308,7 +302,7 @@ public final class Methods extends GraphObjects {
                 dydt = rhs(variableArgList, aTempArgArrayList, flowArrayList);
             }
             for (int i = 0; i < numOfStocks; i++) {
-                k2.set(i, step * dydt[i]);
+                k2.set(i, stepSize * dydt[i]);
             }
             for (int i = 0; i < numOfStocks; i++) {
 
@@ -334,7 +328,7 @@ public final class Methods extends GraphObjects {
         return data;
     }
 
-    public XYSeriesCollection eulers(double t0, double tF, double step, ArrayList<Argument> argumentList,
+    public XYSeriesCollection eulers(double t0, double tF, double stepSize, ArrayList<Argument> argumentList,
             ArrayList<Argument> variableArgList, ArrayList<StockObject> stockArrayList, 
             ArrayList<GraphObjects.FlowObject> flowArrayList) {
 
@@ -345,7 +339,7 @@ public final class Methods extends GraphObjects {
         for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j];
         }
-        double numSteps = (tF - t0) / step;
+        double numSteps = (tF - t0) / stepSize;
         double t = t0;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
@@ -355,18 +349,9 @@ public final class Methods extends GraphObjects {
 
         ArrayList<Double> k1 = new ArrayList<Double>();
 
-        ArrayList<Double> k2 = new ArrayList<Double>();
-
-        ArrayList<Double> k3 = new ArrayList<Double>();
-
-        ArrayList<Double> k4 = new ArrayList<Double>();
-
         //idea is to set k1 through k4 ArrayLists to double values of 0
         for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
-            k2.add(0.0);
-            k3.add(0.0);
-            k4.add(0.0);
         }
 
         //array list length of amount of stocks
@@ -394,14 +379,14 @@ public final class Methods extends GraphObjects {
         double value;
 
         for (int n = 0; n < numSteps; n++) {
-            t = t0 + (n) * step;
+            t = t0 + (n) * stepSize;
 
             //Let's find k1:
             dydt = rhs(variableArgList, argumentList, flowArrayList);
 
             for (int i = 0; i < numOfStocks; i++) {
 
-                k1.set(i, step * dydt[i]);
+                k1.set(i, stepSize * dydt[i]);
             }
 
             for (int i = 0; i < numOfStocks; i++) {
@@ -427,7 +412,8 @@ public final class Methods extends GraphObjects {
         }
         return data;
     }
-
+    
+    //This method handles the actual equation the user creates.
     public double[] rhs(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
 
         //set double array of size of stockArrayList
@@ -448,6 +434,7 @@ public final class Methods extends GraphObjects {
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
                 e = new Expression(flow.getflowEquation(), globalvariables);
+                
                 ret[i] = e.calculate();
 
             }
