@@ -58,7 +58,8 @@ public class StockObject {
 
         //return stock arg of argument type
         public Argument getStockArg() {
-            return aStockArg;
+           // Argument newStockArg = new Argument( aStockArg.getSymbol,aStockArg.getArgumentValue());
+            return aStockArg.clone();
         }
 
         //sets the argument
