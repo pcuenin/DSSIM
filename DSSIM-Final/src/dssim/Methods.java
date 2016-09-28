@@ -27,7 +27,7 @@ package dssim;
  *
  * @author Lander University
  */
-import dssim.GraphObjects;
+
 import dssim.gui.FlowObject;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
@@ -37,7 +37,7 @@ import org.mariuszgromada.math.mxparser.*;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
 
-public final class Methods extends GraphObjects {
+public final class Methods  {
 
     //this data type is from the jfreechart library
     public XYSeriesCollection data;
@@ -138,7 +138,7 @@ public final class Methods extends GraphObjects {
 
         //create series to hold graph data
         for (int i = 0; i < stockArrayList.size(); i++) {
-            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
+            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).getObjName());
             series.add(tempSeries);
         }
 
@@ -270,7 +270,7 @@ public final class Methods extends GraphObjects {
 
         //create series to hold graph data
         for (int i = 0; i < stockArrayList.size(); i++) {
-            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
+            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).getObjName());
             series.add(tempSeries);
         }
 
@@ -376,7 +376,7 @@ public final class Methods extends GraphObjects {
 
         //create series to hold graph data
         for (int i = 0; i < stockArrayList.size(); i++) {
-            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).sStockName);
+            XYSeries tempSeries = new XYSeries(stockArrayList.get(i).getObjName());
             series.add(tempSeries);
         }
 

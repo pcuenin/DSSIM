@@ -29,68 +29,48 @@ import org.mariuszgromada.math.mxparser.Argument;
  *
  * @author paulcuenin
  */
-public class VariableObject {
+public class VariableObject extends SuperObject {
 
-        public String sVarName;
-        public String sVarSymbol;
-        public String sVarInitial;
-        public Object oVariable;
-        //public String sFlowEquation;
-        public Argument aVarArg;
-        public String sVarJgraphName;
+    private String sVarDescrip;
+    private String sVarInitial;
+    //public String sFlowEquation;
+    private Argument aVarArg;
 
-        public VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
-            sVarJgraphName = graphobject.toString();
-            sVarName = inputname;
-            sVarSymbol = inputsymbol;
-            sVarInitial = inputinitial;
-            oVariable = graphobject;
-            //will cause issue if user inputs into variable a string like "x*54"
-            //may use if statement to check for what type of argument constructor to use to avoid errors
-            aVarArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
-        }
-
-        public Argument getVarArg() {
-            return aVarArg;
-        }
-
-        public void setVarArg(String symbol, String initial) {
-            aVarArg = new Argument(symbol, Double.parseDouble(initial));
-        }
-
-        public String getVarName() {
-            return sVarName;
-        }
-
-        //for use later by gui
-        public void setVarName(String newname) {
-            sVarName = newname;
-        }
-
-        public String getVarSymbol() {
-            return sVarSymbol;
-        }
-
-        public void setVarSymbol(String newsymbol) {
-            sVarSymbol = newsymbol;
-        }
-
-        public String getVarInitial() {
-            return sVarInitial;
-        }
-
-        public void setVarInitial(String newinitial) {
-            sVarInitial = newinitial;
-            setVarArg(sVarSymbol, sVarInitial);
-        }
-
-        public Object getVarObject() {
-
-            return oVariable;
-        }
-
-        public String getJgraphName() {
-            return sVarJgraphName;
-        }
-
+    public VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
+        super(inputname, graphobject);
+//sObjJgraphName = graphobject.toString();
+        //sObjName = inputname;
+        sVarDescrip = inputsymbol;
+        sVarInitial = inputinitial;
+        //oObj = graphobject;
+        //will cause issue if user inputs into variable a string like "x*54"
+        //may use if statement to check for what type of argument constructor to use to avoid errors
+        aVarArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
     }
+
+    public Argument getVarArg() {
+        return aVarArg;
+    }
+
+    public void setVarArg(String symbol, String initial) {
+        aVarArg = new Argument(symbol, Double.parseDouble(initial));
+    }
+
+    public String getVarDescrip() {
+        return sVarDescrip;
+    }
+
+    public void setVarDescrip(String newsymbol) {
+        sVarDescrip = newsymbol;
+    }
+
+    public String getVarInitial() {
+        return sVarInitial;
+    }
+
+    public void setVarInitial(String newinitial) {
+        sVarInitial = newinitial;
+        setVarArg(sVarDescrip, sVarInitial);
+    }
+
+}

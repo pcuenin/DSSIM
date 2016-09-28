@@ -1,4 +1,4 @@
-  /*
+/*
  * The MIT License
  *
  * Copyright 2016 paulcuenin.
@@ -27,20 +27,37 @@ package dssim.gui;
  *
  * @author paulcuenin
  */
-public class ArrowObject extends SuperObject {
-    
-    // add from and to super object types
-    SuperObject superObjectTo = null;
-    SuperObject superObjectFrom = null;
+public class SuperObject {
 
-        
-        
-      
+    private String sObjName; //for keeping the name given from the user
+    private Object oObj; //the JGraph object that is created by placing the object
+    private String sObjJgraphName; //JGraph object name 
 
-        public ArrowObject(String inputname, Object graphobject) {
-            super(inputname, graphobject);
+    public SuperObject(String inputname, Object graphobject) {
+            sObjName = inputname;
+            sObjJgraphName = graphobject.toString();
+            oObj = graphobject;
 
         }
-
-        
+    //sets gets the object name
+    public String getObjName() {
+        return sObjName;
     }
+
+    public void setObjName(String newname) {
+        sObjName = newname;
+    }
+    //returns the graph object name this and the stockobject builds a reference table 
+
+    public String getObjJgraphName() {
+        return sObjJgraphName;
+    }
+
+    //returns the stock object of jgraph object type
+
+    public Object getO_Object() {
+
+        return oObj;
+    }
+
+}

@@ -27,50 +27,36 @@ package dssim.gui;
  *
  * @author paulcuenin
  */
-public class FlowObject {
+public class FlowObject extends SuperObject {
 
-        public String sFlowName;
-        public String sFlowSymbol;
-        public Object oFlow;
-        public String sFlowEquation;
-        public String sFlowJgraphName;
+    private String sFlowDescrip;
+    private String sFlowEquation;
+    // add from and to super object types
+    SuperObject superObjectTo = null;
+    SuperObject superObjectFrom = null;
 
-        public FlowObject(Object graphobject, String inputname, String inputequation) {
+    public FlowObject(Object graphobject, String inputname, String inputequation) {
 
-            //flow name from user
-            sFlowName = inputname;
-            //jgraph object cell name
-            sFlowJgraphName = graphobject.toString();
-            //object given from jgraph
-            oFlow = graphobject;
-            //input equation from user. for rhs data building later
-            sFlowEquation = inputequation;
+        //flow name from user
+        //sObjName = inputname;
+        //jgraph object cell name
+        //sObjJgraphName = graphobject.toString();
+        //object given from jgraph
+        //oObj = graphobject;
+        //input equation from user. for rhs data building later
+        super(inputname, graphobject);
+        sFlowEquation = inputequation;
 
-        }
-
-        public String getFlowName() {
-            return sFlowName;
-        }
-
-        //for use later by gui
-        public void setFlowName(String newname) {
-            sFlowName = newname;
-        }
-
-        public Object getFlowObject() {
-
-            return oFlow;
-        }
-
-        public String getFlowJgraphName() {
-            return sFlowJgraphName;
-        }
-
-        public String getflowEquation() {
-            return sFlowEquation;
-        }
-
-        public void setFlowEquation(String newequation) {
-            sFlowEquation = newequation;
-        }
     }
+
+    //for use later by gui
+  
+
+    public String getflowEquation() {
+        return sFlowEquation;
+    }
+
+    public void setFlowEquation(String newequation) {
+        sFlowEquation = newequation;
+    }
+}
