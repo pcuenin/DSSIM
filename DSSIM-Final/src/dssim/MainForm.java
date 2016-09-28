@@ -30,6 +30,8 @@ package dssim;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
+import dssim.gui.ArrowObject;
+import dssim.gui.FlowObject;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,6 +51,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeriesCollection;
 import dssim.gui.StockObject;
+import dssim.gui.VariableObject;
 
 public class MainForm extends javax.swing.JFrame {
 
@@ -78,9 +81,9 @@ public class MainForm extends javax.swing.JFrame {
      another method could be to keep track
      by using a hashtable. Yet, arraylists have very useful methods. */
     public ArrayList<StockObject> stockArrayList = new ArrayList<StockObject>();
-    public ArrayList<GraphObjects.FlowObject> flowArrayList = new ArrayList<GraphObjects.FlowObject>();
-    public ArrayList<GraphObjects.VariableObject> variableArrayList = new ArrayList<GraphObjects.VariableObject>();
-    public ArrayList<GraphObjects.ArrowObject> arrowArrayList = new ArrayList<GraphObjects.ArrowObject>();
+    public ArrayList<FlowObject> flowArrayList = new ArrayList<FlowObject>();
+    public ArrayList<VariableObject> variableArrayList = new ArrayList<VariableObject>();
+    public ArrayList<ArrowObject> arrowArrayList = new ArrayList<ArrowObject>();
 
     /**
      * Creates new form MainForm
@@ -110,7 +113,7 @@ public class MainForm extends javax.swing.JFrame {
 
         graphComponent = new mxGraphComponent(graph);
         graphComponent.setGridVisible(true);
-        jScrollPane1.setViewportView(graphComponent);
+        jScrollPane1.setViewportView(graphComponent); // might be causing issue with cursor PMC
 
         // allow the user to use the mouse to navigate
         graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
@@ -123,6 +126,7 @@ public class MainForm extends javax.swing.JFrame {
                 cell = graphComponent.getCellAt(e.getX(), e.getY());
                 // different objectLoc will call different Add functions
                 if (objectLoc == 1) {
+                    stockInfoForm();
                     AddStock(inputname, style, inputsymbol, inputinitial, inputequation, e.getX(), e.getY());
                     objectLoc = -1;
                 } else if (objectLoc == 2) {
@@ -176,6 +180,16 @@ public class MainForm extends javax.swing.JFrame {
         graph.getStylesheet().putCellStyle("Variable", stylelist.getVariable());
     }
 
+    // paul added this PMC 9-27-16
+    public void CustomCursor() {
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Image img = toolkit.getImage("lilcombo.png");
+        Point point = new Point(0, 0);
+        Cursor cursor = toolkit.createCustomCursor(img, point, "Cursor");
+        
+        graphComponent.setCursor(cursor); // still doesn't work PMC
+    }
+
 //This method will add a stock to the graph
     void AddStock(String name, String styleName,
             String inputsymbol, String inputinitial, String inputequation, int x, int y) {
@@ -191,7 +205,7 @@ public class MainForm extends javax.swing.JFrame {
         StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial);
         stockArrayList.add(stockobject);
     }
-// This method will ass a flow to the graph
+// This method will add a flow to the graph
 
     void AddFlow(String name, String styleName, int x, int y) {
         Object parent = graph.getDefaultParent();
@@ -202,7 +216,7 @@ public class MainForm extends javax.swing.JFrame {
         try {
             //flowObject is added to the flowArrayList
             Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-            GraphObjects.FlowObject flowobject = new GraphObjects.FlowObject(node, inputname, inputequation);
+            FlowObject flowobject = new FlowObject(node, inputname, inputequation);
             flowArrayList.add(flowobject);
         } finally {
             graph.getModel().endUpdate();
@@ -341,7 +355,7 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().beginUpdate();
         try {
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
-            GraphObjects.VariableObject variableobject = new GraphObjects.VariableObject(node, inputName, 
+            VariableObject variableobject = new VariableObject(node, inputName,
                     inputSymbol, inputInitial);
             variableArrayList.add(variableobject);
         } finally {
@@ -362,23 +376,20 @@ public class MainForm extends javax.swing.JFrame {
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jPanel1 = new javax.swing.JPanel();
+        jSeparator4 = new javax.swing.JSeparator();
         stockBtn = new javax.swing.JButton();
         flowBtn = new javax.swing.JButton();
+        arrowComboBox = new javax.swing.JComboBox<String>();
         variableBtn = new javax.swing.JButton();
         deleteBtn = new javax.swing.JToggleButton();
-        runSimBtn = new javax.swing.JButton();
         modelSettingsBtn = new javax.swing.JButton();
-        closeBtn = new javax.swing.JButton();
-        jSeparator2 = new javax.swing.JSeparator();
-        jSeparator3 = new javax.swing.JSeparator();
-        methodChoiceCombo = new javax.swing.JComboBox();
-        analysisMethodLabel = new javax.swing.JLabel();
+        runSimBtn = new javax.swing.JButton();
         viewGraphButton = new javax.swing.JButton();
         viewTableButton = new javax.swing.JButton();
+        analysisMethodLabel = new javax.swing.JLabel();
+        methodChoiceCombo = new javax.swing.JComboBox();
         showAllVariableBtn = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
-        jSeparator4 = new javax.swing.JSeparator();
-        arrowComboBox = new javax.swing.JComboBox<>();
+        closeBtn = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         SaveMenuItem = new javax.swing.JMenuItem();
@@ -416,11 +427,30 @@ public class MainForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jScrollPane1.setBackground(new java.awt.Color(255, 255, 255));
         jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
 
+        jSeparator4.setBackground(new java.awt.Color(51, 51, 51));
+        jSeparator4.setForeground(new java.awt.Color(51, 51, 51));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jSeparator4))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(43, 43, 43))
+        );
+
         stockBtn.setText("Stock");
+        stockBtn.setToolTipText("Create Stock");
         stockBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 stockBtnActionPerformed(evt);
@@ -428,13 +458,22 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         flowBtn.setText("Flow");
+        flowBtn.setToolTipText("Create Flow");
         flowBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 flowBtnActionPerformed(evt);
             }
         });
 
+        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
+        arrowComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                arrowComboBoxActionPerformed(evt);
+            }
+        });
+
         variableBtn.setText("Variable");
+        variableBtn.setToolTipText("Add Variable");
         variableBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 variableBtnActionPerformed(evt);
@@ -442,41 +481,50 @@ public class MainForm extends javax.swing.JFrame {
         });
 
         deleteBtn.setText("Delete");
+        deleteBtn.setToolTipText("Delete Selected Item");
         deleteBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 deleteBtnActionPerformed(evt);
             }
         });
 
-        runSimBtn.setText("Run Simulation");
-        runSimBtn.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                runSimBtnActionPerformed(evt);
-            }
-        });
-
-        modelSettingsBtn.setText("Model Settings");
+        modelSettingsBtn.setText("<html> <div align=\"center\">\nModel <br>  Settings </div></html>");
+        modelSettingsBtn.setToolTipText("Change Model Settings");
+        modelSettingsBtn.setAlignmentY(0.0F);
+        modelSettingsBtn.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+        modelSettingsBtn.setIconTextGap(0);
+        modelSettingsBtn.setMargin(new java.awt.Insets(0, 0, 0, 0));
         modelSettingsBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 modelSettingsBtnActionPerformed(evt);
             }
         });
 
-        closeBtn.setText("Close");
-        closeBtn.setMaximumSize(new java.awt.Dimension(107, 23));
-        closeBtn.setMinimumSize(new java.awt.Dimension(107, 23));
-        closeBtn.setPreferredSize(new java.awt.Dimension(107, 23));
-        closeBtn.addActionListener(new java.awt.event.ActionListener() {
+        runSimBtn.setText("Run");
+        runSimBtn.setToolTipText("Run Simulation");
+        runSimBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                closeBtnActionPerformed(evt);
+                runSimBtnActionPerformed(evt);
             }
         });
 
-        jSeparator2.setBackground(new java.awt.Color(51, 51, 51));
-        jSeparator2.setForeground(new java.awt.Color(51, 51, 51));
+        viewGraphButton.setText("Graph");
+        viewGraphButton.setToolTipText("View Graph");
+        viewGraphButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewGraphButtonActionPerformed(evt);
+            }
+        });
 
-        jSeparator3.setBackground(new java.awt.Color(51, 51, 51));
-        jSeparator3.setForeground(new java.awt.Color(51, 51, 51));
+        viewTableButton.setText("Table");
+        viewTableButton.setToolTipText("View Table");
+        viewTableButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewTableButtonActionPerformed(evt);
+            }
+        });
+
+        analysisMethodLabel.setText("Analysis Method");
 
         methodChoiceCombo.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Eulers", "Runge-Kutta 2", "Runge Kutta 4" }));
         methodChoiceCombo.addActionListener(new java.awt.event.ActionListener() {
@@ -485,112 +533,24 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
-        analysisMethodLabel.setText("Analysis Method");
-
-        viewGraphButton.setText("View Graph");
-        viewGraphButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewGraphButtonActionPerformed(evt);
-            }
-        });
-
-        viewTableButton.setText("View Table");
-        viewTableButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                viewTableButtonActionPerformed(evt);
-            }
-        });
-
-        showAllVariableBtn.setText("Show All Inputs");
+        showAllVariableBtn.setText("<html>  <div align=\"center\"> All<br> Inputs</div></html>");
+        showAllVariableBtn.setToolTipText("Show All Inputs");
         showAllVariableBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 showAllVariableBtnActionPerformed(evt);
             }
         });
 
-        jSeparator1.setBackground(new java.awt.Color(51, 51, 51));
-        jSeparator1.setForeground(new java.awt.Color(51, 51, 51));
-
-        jSeparator4.setBackground(new java.awt.Color(51, 51, 51));
-        jSeparator4.setForeground(new java.awt.Color(51, 51, 51));
-
-        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
-        arrowComboBox.addActionListener(new java.awt.event.ActionListener() {
+        closeBtn.setText("Close");
+        closeBtn.setToolTipText("Close Program");
+        closeBtn.setMaximumSize(new java.awt.Dimension(107, 23));
+        closeBtn.setMinimumSize(new java.awt.Dimension(107, 23));
+        closeBtn.setPreferredSize(new java.awt.Dimension(107, 23));
+        closeBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowComboBoxActionPerformed(evt);
+                closeBtnActionPerformed(evt);
             }
         });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(closeBtn, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
-                    .addComponent(showAllVariableBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(methodChoiceCombo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(viewTableButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(viewGraphButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(runSimBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(deleteBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(variableBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(flowBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(stockBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator2)
-                    .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator1)
-                    .addComponent(modelSettingsBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(analysisMethodLabel)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(arrowComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(stockBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(flowBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(arrowComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(9, 9, 9)
-                .addComponent(variableBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(deleteBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(modelSettingsBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(runSimBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(viewGraphButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(viewTableButton)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(analysisMethodLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(methodChoiceCombo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(10, 10, 10)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(showAllVariableBtn)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
-                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 5, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
-
-        methodChoiceCombo.getAccessibleContext().setAccessibleName("");
-        methodChoiceCombo.getAccessibleContext().setAccessibleDescription("");
 
         FileMenu.setText("File");
 
@@ -747,10 +707,37 @@ public class MainForm extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 861, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(stockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(flowBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(arrowComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(variableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(modelSettingsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(runSimBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(viewGraphButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(viewTableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(analysisMethodLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(methodChoiceCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(showAllVariableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -758,10 +745,33 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(stockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(flowBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(arrowComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(variableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(runSimBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(viewGraphButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(viewTableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(modelSettingsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(showAllVariableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(analysisMethodLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(methodChoiceCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)))
                 .addContainerGap())
         );
+
+        runSimBtn.getAccessibleContext().setAccessibleName("Run \nSimulation");
+        methodChoiceCombo.getAccessibleContext().setAccessibleName("");
+        methodChoiceCombo.getAccessibleContext().setAccessibleDescription("");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -792,20 +802,20 @@ public class MainForm extends javax.swing.JFrame {
         //this is an attempt at fixing the bug of data not resetting. Yet it still doesn't reset
         //method2.ResetData(data);
         for (int i = 0; i < stockArrayList.size(); i++) {
-            String s = stockArrayList.get(i).getStockName();
+            String s = stockArrayList.get(i).getObjName();
             final JTextField stockName = new JTextField(s);
-            final JTextField stockSymbol = new JTextField(stockArrayList.get(i).getStockSymbol());
+            final JTextField stockSymbol = new JTextField(stockArrayList.get(i).getStockDescrip());
             final JTextField stockInitial = new JTextField(stockArrayList.get(i).getStockInitial());
             int cnt = i;
-            stockArrayList.get(cnt).setStockName(stockName.getText());
-            stockArrayList.get(cnt).setStockSymbol(stockSymbol.getText());
+            stockArrayList.get(cnt).setObjName(stockName.getText());
+            stockArrayList.get(cnt).setStockDescrip(stockSymbol.getText());
             stockArrayList.get(cnt).setStockInitial(stockInitial.getText());
             stockArrayList.get(cnt).setStockArg(stockSymbol.getText(), stockInitial.getText());
         }
         //one improvement is to make things like Double.parseDouble(modelSettings.getFinalTime() static variables
-        method2 = new Methods((ArrayList) stockArrayList, flowArrayList, variableArrayList, 
-                Double.parseDouble(modelSettings.getInitialTime()), 
-                Double.parseDouble(modelSettings.getFinalTime()), Double.parseDouble(modelSettings.getTimeStep()), 
+        method2 = new Methods((ArrayList) stockArrayList, flowArrayList, variableArrayList,
+                Double.parseDouble(modelSettings.getInitialTime()),
+                Double.parseDouble(modelSettings.getFinalTime()), Double.parseDouble(modelSettings.getTimeStep()),
                 methodChoice);
         //try to reset data
         tableModel = null;
@@ -825,25 +835,25 @@ public class MainForm extends javax.swing.JFrame {
         //needs to be deleted. The main key references here are the graphobject cell name kept in the arraylist of that object.
         for (int i = 0; i < stockArrayList.size(); i++) {
 
-            if (stockArrayList.get(i).getStockJgraphName().equals(cell.toString())) {
+            if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 stockArrayList.remove(i);
             }
         }
         for (int i = 0; i < flowArrayList.size(); i++) {
 
-            if (flowArrayList.get(i).getFlowJgraphName().equals(cell.toString())) {
+            if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 flowArrayList.remove(i);
             }
         }
         for (int i = 0; i < arrowArrayList.size(); i++) {
 
-            if (arrowArrayList.get(i).getArrowJgraphName().equals(cell.toString())) {
+            if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 arrowArrayList.remove(i);
             }
         }
         for (int i = 0; i < variableArrayList.size(); i++) {
 
-            if (variableArrayList.get(i).getJgraphName().equals(cell.toString())) {
+            if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 variableArrayList.remove(i);
             }
         }
@@ -851,51 +861,92 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_deleteBtnActionPerformed
 
     private void stockBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stockBtnActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here: PMC
         //increment amount of stocks, used for panels and default names
         //changed amount of stocks a different way, like by taking the size of the stockArrayList
 
         style = "Stock";
-        //check if the user would like to input information
-        JPanel check = new JPanel();
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this stock?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField stockName = new JTextField("Stock" + stockArrayList.size());
-            JTextField stockInitial = new JTextField(Double.toString(0.0));
-            JTextField stockSymbol = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
-            JPanel addStock = new JPanel();
-            addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
-            addStock.add(new JLabel("Stock Name"));
-            addStock.add(stockName);
-            addStock.add(new JLabel("Stock Symbol"));
-            addStock.add(stockSymbol);
-            addStock.add(new JLabel("Stock Initial Value"));
-            addStock.add(stockInitial);
+        CustomCursor();
 
-            int option = JOptionPane.showConfirmDialog(null, addStock);
-            inputname = stockName.getText();
-            inputsymbol = stockSymbol.getText();
-            inputinitial = stockInitial.getText();
-        } //if no, set blank or default
-        else {
-            //blank values, stock name increments
-            inputname = "Stock" + stockArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputinitial = Double.toString(0.0);
-            inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
-        }
-        //updates objectLoc for mouse event on where to place the object on the graph
+        /* I commented this out to see if I could move the form later in the flow
+         //check if the user would like to input information
+         JPanel check = new JPanel(); //create box
+         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS)); // center the box
+         check.add(new JLabel("Would you like to input information for this stock?")); // ask them question
+         int yN = JOptionPane.showConfirmDialog(null, check);
+         if (yN == 0) {
+         //if yes, get info
+         //Base values in case someone hits enter to fast, so it wont throw errors
+         JTextField stockName = new JTextField("Stock" + stockArrayList.size());
+         JTextField stockInitial = new JTextField(Double.toString(0.0));
+         JTextField stockDescrip = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
+         JPanel addStock = new JPanel();
+         addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
+         addStock.add(new JLabel("Stock Name"));
+         addStock.add(stockName);
+         addStock.add(new JLabel("Stock Symbol"));
+         addStock.add(stockDescrip);
+         addStock.add(new JLabel("Stock Initial Value"));
+         addStock.add(stockInitial);
+
+         int option = JOptionPane.showConfirmDialog(null, addStock);
+         inputname = stockName.getText();
+         inputsymbol = stockDescrip.getText();
+         inputinitial = stockInitial.getText();
+         } //if no, set blank or default
+         else {
+         //blank values, stock name increments
+         inputname = "Stock" + stockArrayList.size();
+         //these can NOT be "", they show as null and go haywire
+         inputinitial = Double.toString(0.0);
+         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
+         }
+         //updates objectLoc for mouse event on where to place the object on the graph
+         */
         objectLoc = 1;
 
     }//GEN-LAST:event_stockBtnActionPerformed
+    private void stockInfoForm() {
 
+        //check if the user would like to input information
+        /*JPanel check = new JPanel(); //create box
+         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS)); // center the box
+         check.add(new JLabel("Would you like to input information for this stock?")); // ask them question
+         int yN = JOptionPane.showConfirmDialog(null, check);
+         if (yN == 0) {*/
+            //if yes, get info
+        //Base values in case someone hits enter to fast, so it wont throw errors
+        JTextField stockName = new JTextField("Stock" + stockArrayList.size());
+        JTextField stockInitial = new JTextField(Double.toString(0.0));
+        JTextField stockDescrip = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
+        JPanel addStock = new JPanel();
+        addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
+        addStock.add(new JLabel("Stock Name"));
+        addStock.add(stockName);
+        addStock.add(new JLabel("Stock Description"));
+        addStock.add(stockDescrip);
+        addStock.add(new JLabel("Stock Initial Value"));
+        addStock.add(stockInitial);
+
+        int option = JOptionPane.showConfirmDialog(null, addStock);
+        inputname = stockName.getText();
+        inputsymbol = stockDescrip.getText();
+        inputinitial = stockInitial.getText();
+
+        /*} //if no, set blank or default
+         else {
+         //blank values, stock name increments
+         inputname = "Stock" + stockArrayList.size();
+         //these can NOT be "", they show as null and go haywire
+         inputinitial = Double.toString(0.0);
+         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
+         }*/
+        //updates objectLoc for mouse event on where to place the object on the graph
+    }
     private void modelSettingsBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_modelSettingsBtnActionPerformed
         // TODO add your handling code here:
         //Creates a new JFrame that displays the GUI from ModelSettings.java class
+
         
         if (!modelSettings.isFrameAvailable())
         {
@@ -908,6 +959,7 @@ public class MainForm extends javax.swing.JFrame {
         }
         
         modelSettings.getFrame().setVisible(true);
+
     }//GEN-LAST:event_modelSettingsBtnActionPerformed
 
     private void variableBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_variableBtnActionPerformed
@@ -955,43 +1007,46 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_closeBtnActionPerformed
 
     private void StockMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StockMenuItemActionPerformed
-        // TODO add your handling code here:
-        //method is the same as the StockBtn above. It is just an extra one in the top menus
-        //increment amount of stocks, used for panels and default names
-        style = "Stock";
-        //check if the user would like to input information
-        JPanel check = new JPanel();
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this stock?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField stockName = new JTextField("Stock" + stockArrayList.size());
-            JTextField stockInitial = new JTextField(Double.toString(0.0));
-            JTextField stockSymbol = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
-            JPanel addStock = new JPanel();
-            addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
-            addStock.add(new JLabel("Stock Name"));
-            addStock.add(stockName);
-            addStock.add(new JLabel("Stock Symbol"));
-            addStock.add(stockSymbol);
-            addStock.add(new JLabel("Stock Initial Value"));
-            addStock.add(stockInitial);
-            int option = JOptionPane.showConfirmDialog(null, addStock);
-            inputname = stockName.getText();
-            inputsymbol = stockSymbol.getText();
-            inputinitial = stockInitial.getText();
-        } //if no, set blank or default
-        else {
-            //blank values, stock name increments
-            inputname = "Stock" + stockArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputinitial = Double.toString(0.0);
-            inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
-        }
-        objectLoc = 1;
-        //old code for posterety 
+        /*
+         // TODO add your handling code here: What is this here? PMC
+         //method is the same as the StockBtn above. It is just an extra one in the top menus
+         //increment amount of stocks, used for panels and default names
+         style = "Stock";
+         //check if the user would like to input information
+         JPanel check = new JPanel();
+         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
+         check.add(new JLabel("Would you like to input information for this stock?"));
+         int yN = JOptionPane.showConfirmDialog(null, check);
+         if (yN == 0) {
+         //if yes, get info
+         //Base values in case someone hits enter to fast, so it wont throw errors
+         JTextField stockName = new JTextField("Stock" + stockArrayList.size());
+         JTextField stockInitial = new JTextField(Double.toString(0.0));
+         JTextField stockDescrip = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
+         JPanel addStock = new JPanel();
+         addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
+         addStock.add(new JLabel("Stock Name"));
+         addStock.add(stockName);
+         addStock.add(new JLabel("Stock Symbol"));
+         addStock.add(stockDescrip);
+         addStock.add(new JLabel("Stock Initial Value"));
+         addStock.add(stockInitial);
+         int option = JOptionPane.showConfirmDialog(null, addStock);
+         inputname = stockName.getText();
+         inputsymbol = stockDescrip.getText();
+         inputinitial = stockInitial.getText();
+         } //if no, set blank or default
+         else {
+         //blank values, stock name increments
+         inputname = "Stock" + stockArrayList.size();
+         //these can NOT be "", they show as null and go haywire
+         inputinitial = Double.toString(0.0);
+         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
+         }
+         objectLoc = 1;
+         //old code for posterety */
+        stockBtnActionPerformed(evt);
+
     }//GEN-LAST:event_StockMenuItemActionPerformed
 
     private void DeleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteMenuItemActionPerformed
@@ -1003,25 +1058,25 @@ public class MainForm extends javax.swing.JFrame {
 
         for (int i = 0; i < stockArrayList.size(); i++) {
 
-            if (stockArrayList.get(i).getStockJgraphName().equals(cell.toString())) {
+            if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 stockArrayList.remove(i);
             }
         }
         for (int i = 0; i < flowArrayList.size(); i++) {
 
-            if (flowArrayList.get(i).getFlowJgraphName().equals(cell.toString())) {
+            if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 flowArrayList.remove(i);
             }
         }
         for (int i = 0; i < arrowArrayList.size(); i++) {
 
-            if (arrowArrayList.get(i).getArrowJgraphName().equals(cell.toString())) {
+            if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 arrowArrayList.remove(i);
             }
         }
         for (int i = 0; i < variableArrayList.size(); i++) {
 
-            if (variableArrayList.get(i).getJgraphName().equals(cell.toString())) {
+            if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
                 variableArrayList.remove(i);
             }
         }
@@ -1191,17 +1246,17 @@ public class MainForm extends javax.swing.JFrame {
         for (int i = 0; i < stockArrayList.size(); i++) {
             //Panel per stock
             final int cnt = i;
-            String s = stockArrayList.get(i).getStockName();
+            String s = stockArrayList.get(i).getObjName();
             JPanel stock = new JPanel();
             stock.setName(s);
             //pre filling fields. stockname is s because its the same as the panel name
             final JTextField stockName = new JTextField(s);
-            final JTextField stockSymbol = new JTextField(stockArrayList.get(i).getStockSymbol());
+            final JTextField stockSymbol = new JTextField(stockArrayList.get(i).getStockDescrip());
             final JTextField stockInitial = new JTextField(stockArrayList.get(i).getStockInitial());
 
             stock.setLayout(new BoxLayout(stock, BoxLayout.PAGE_AXIS));
             stock.add(new JLabel(" "));
-            stock.add(new JLabel("Stock options for " + stockArrayList.get(i).getStockName()));
+            stock.add(new JLabel("Stock options for " + stockArrayList.get(i).getObjName()));
             stock.add(new JLabel("Stock Name"));
             stock.add(stockName);
             stock.add(new JLabel("Stock Symbol"));
@@ -1214,8 +1269,8 @@ public class MainForm extends javax.swing.JFrame {
             buttons.add(saveBtn);
             saveBtn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    stockArrayList.get(cnt).setStockName(stockName.getText());
-                    stockArrayList.get(cnt).setStockSymbol(stockSymbol.getText());
+                    stockArrayList.get(cnt).setObjName(stockName.getText());
+                    stockArrayList.get(cnt).setStockDescrip(stockSymbol.getText());
                     stockArrayList.get(cnt).setStockInitial(stockInitial.getText());
                     stockArrayList.get(cnt).setStockArg(stockSymbol.getText(), stockInitial.getText());
                     //now it saves, but i want it to update the jgraph with the names
@@ -1230,7 +1285,7 @@ public class MainForm extends javax.swing.JFrame {
         for (int i = 0; i < flowArrayList.size(); i++) {
             //Panel per stock
             final int cnt = i;
-            String s = flowArrayList.get(i).getFlowName();
+            String s = flowArrayList.get(i).getObjName();
             JPanel flow = new JPanel();
             flow.setName(s);
             //pre filling fields. stockname is s because its the same as the panel name
@@ -1238,7 +1293,7 @@ public class MainForm extends javax.swing.JFrame {
             final JTextField flowEquation = new JTextField(flowArrayList.get(i).getflowEquation());
             flow.setLayout(new BoxLayout(flow, BoxLayout.PAGE_AXIS));
             flow.add(new JLabel(" "));
-            flow.add(new JLabel("Flow options for " + flowArrayList.get(i).getFlowName()));
+            flow.add(new JLabel("Flow options for " + flowArrayList.get(i).getObjName()));
             flow.add(new JLabel("Flow Name"));
             flow.add(flowName);
             flow.add(new JLabel("Flow Equation"));
@@ -1249,9 +1304,9 @@ public class MainForm extends javax.swing.JFrame {
             buttons.add(saveBtn);
             saveBtn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    flowArrayList.get(cnt).setFlowName(flowName.getText());
+                    flowArrayList.get(cnt).setObjName(flowName.getText());
                     flowArrayList.get(cnt).setFlowEquation(flowEquation.getText());
-                    //flowArrayList.get(cnt).setVarArg(stockSymbol.getText(), stockInitial.getText());
+                    //flowArrayList.get(cnt).setVarArg(stockDescrip.getText(), stockInitial.getText());
                     //now it saves, but i want it to update the jgraph with the names
                 }
             });
@@ -1264,17 +1319,17 @@ public class MainForm extends javax.swing.JFrame {
         for (int i = 0; i < variableArrayList.size(); i++) {
             //Panel per stock
             final int cnt = i;
-            String s = variableArrayList.get(i).getVarName();
+            String s = variableArrayList.get(i).getObjName();
             JPanel var = new JPanel();
             var.setName(s);
             //pre filling fields. stockname is s because its the same as the panel name
             final JTextField varName = new JTextField(s);
-            final JTextField varSymbol = new JTextField(variableArrayList.get(i).getVarSymbol());
+            final JTextField varSymbol = new JTextField(variableArrayList.get(i).getVarDescrip());
             final JTextField varValue = new JTextField(variableArrayList.get(i).getVarInitial());
 
             var.setLayout(new BoxLayout(var, BoxLayout.PAGE_AXIS));
             var.add(new JLabel(" "));
-            var.add(new JLabel("Variable options for " + variableArrayList.get(i).getVarName()));
+            var.add(new JLabel("Variable options for " + variableArrayList.get(i).getObjName()));
             var.add(new JLabel("Variable Name"));
             var.add(varName);
             var.add(new JLabel("Variable Symbol"));
@@ -1287,8 +1342,8 @@ public class MainForm extends javax.swing.JFrame {
             buttons.add(saveBtn);
             saveBtn.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    variableArrayList.get(cnt).setVarName(varName.getText());
-                    variableArrayList.get(cnt).setVarSymbol(varSymbol.getText());
+                    variableArrayList.get(cnt).setObjName(varName.getText());
+                    variableArrayList.get(cnt).setVarDescrip(varSymbol.getText());
                     variableArrayList.get(cnt).setVarInitial(varValue.getText());
                     //variableArrayList.get(cnt).setVarArg(varSymbol.getText(), varValue.getText());
                     //now it saves, but i want it to update the jgraph with the names
@@ -1525,9 +1580,6 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JComboBox methodChoiceCombo;
     private javax.swing.JButton modelSettingsBtn;

@@ -29,83 +29,63 @@ import org.mariuszgromada.math.mxparser.Argument;
  *
  * @author paulcuenin
  */
-public class StockObject {
+public class StockObject extends SuperObject {
 
-        public String sStockName; //for keeping the name given from the user
-        public String sStockSymbol; //for keeping the user entered symbol
-        public String sStockInitial; //for keeping the initial value the user enters
-        public Object oStockJgraph; //the JGraph object that is created by placing the object
-        public Argument aStockArg; //Argument data type is from the mxparser library
-        public String sStockJgraphName; //JGraph object name 
+    private String sStockDescrip; //for keeping the user entered symbol
+    private String sStockInitial; //for keeping the initial value the user enters
+    private Argument aStockArg; //Argument data type is from the mxparser library
 
-        //stock object is created for the purposes right now as a variable that is represented in the generated graphs and tables
-        public StockObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
+    //stock object is created for the purposes right now as a variable that is represented in the generated graphs and tables
+    public StockObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
 
-            //stock name from user
-            sStockName = inputname;
-            //jgraph object cell name
-            sStockJgraphName = graphobject.toString();
-            //stock symbol from user
-            sStockSymbol = inputsymbol;
-            //stock initial value input from user. for reference later and building parser argument
-            sStockInitial = inputinitial;
-            //object given from jgraph
-            oStockJgraph = graphobject;
+        super(inputname, graphobject);
+        //stock name from user
+        //sObjName = inputname;
+        //jgraph object cell name
+        //sObjJgraphName = graphobject.toString();
+        //stock symbol from user
+        sStockDescrip = inputsymbol;
+        //stock initial value input from user. for reference later and building parser argument
+        sStockInitial = inputinitial;
+        //object given from jgraph
+        //oObj = graphobject;
+        
 
-            aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+        aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
 
-        }
-
-        //return stock arg of argument type
-        public Argument getStockArg() {
-           // Argument newStockArg = new Argument( aStockArg.getSymbol,aStockArg.getArgumentValue());
-            return aStockArg.clone();
-        }
-
-        //sets the argument
-        public void setStockArg(String symbol, String initial) {
-            aStockArg = new Argument(symbol, Double.parseDouble(initial));
-        }
-
-        //sets gets the stock name
-        public String getStockName() {
-            return sStockName;
-        }
-
-        //for use by mainform class
-        public void setStockName(String newname) {
-            sStockName = newname;
-        }
-
-        //get stock symbol
-        public String getStockSymbol() {
-            return sStockSymbol;
-        }
-
-        //set stock symbol
-        public void setStockSymbol(String newsymbol) {
-            sStockSymbol = newsymbol;
-        }
-
-        //return initial value as a string
-        public String getStockInitial() {
-            return sStockInitial;
-        }
-
-        //set stock initial value
-        public void setStockInitial(String newinitial) {
-            sStockInitial = newinitial;
-        }
-
-        //returns the stock object of jgraph object type
-        public Object getStockObject() {
-
-            return oStockJgraph;
-        }
-
-        //returns the graph object name this and the stockobject builds a reference table 
-        public String getStockJgraphName() {
-            return sStockJgraphName;
-        }
 
     }
+
+
+    //return stock arg of argument type
+    public Argument getStockArg() {
+        return aStockArg;
+    }
+
+    //sets the argument
+    public void setStockArg(String symbol, String initial) {
+        aStockArg = new Argument(symbol, Double.parseDouble(initial));
+    }
+
+    //get stock symbol
+    public String getStockDescrip() {
+        return sStockDescrip;
+    }
+
+    //set stock symbol
+    public void setStockDescrip(String newsymbol) {
+        sStockDescrip = newsymbol;
+    }
+
+    //return initial value as a string
+    public String getStockInitial() {
+        return sStockInitial;
+    }
+
+    //set stock initial value
+    public void setStockInitial(String newinitial) {
+        sStockInitial = newinitial;
+    }
+
+        //returns the graph object name this and the stockobject builds a reference table 
+}

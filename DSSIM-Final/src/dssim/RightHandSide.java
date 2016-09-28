@@ -23,6 +23,7 @@
  */
 package dssim;
 
+import dssim.gui.FlowObject;
 import java.util.ArrayList;
 import org.mariuszgromada.math.mxparser.Argument;
 import org.mariuszgromada.math.mxparser.Expression;
@@ -32,7 +33,7 @@ import org.mariuszgromada.math.mxparser.Expression;
  * @author kamre_000
  */
 public class RightHandSide {
-    public double[] RightHandSide(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<GraphObjects.FlowObject> flowArrayList) {
+    public double[] RightHandSide(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<FlowObject> flowArrayList) {
 
         //set double array of size of stockArrayList
         double[] ret = new double[stockArgList.size()];
@@ -48,7 +49,7 @@ public class RightHandSide {
         for (int j = 0; j < flowArrayList.size(); j++) {
 
             for (int i = 0; i < stockArgList.size(); i++) {
-                GraphObjects.FlowObject flow = flowArrayList.get(j);
+                FlowObject flow = flowArrayList.get(j);
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
                 e = new Expression(flow.getflowEquation(), globalvariables);
