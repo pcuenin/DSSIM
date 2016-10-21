@@ -27,7 +27,7 @@ package dssim;
  *
  * @author Lander University
  */
-
+import com.mxgraph.view.mxGraph;
 import dssim.gui.FlowObject;
 import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
@@ -37,12 +37,12 @@ import org.mariuszgromada.math.mxparser.*;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
 
-public final class Methods  {
+public final class Methods {
 
     //this data type is from the jfreechart library
     public XYSeriesCollection data;
     //as well as this one, this one allows an x y type table setup
-    public DefaultTableModel tableModel = new DefaultTableModel(0, 2);
+    public DefaultTableModel tableModel = new DefaultTableModel();
     //these array lists are instantiated here to be used as global values to be passed to the mainform
     public ArrayList<Argument> argumentList = new ArrayList<Argument>();
     public ArrayList<Argument> variableArgList = new ArrayList<Argument>();
@@ -53,16 +53,15 @@ public final class Methods  {
     }
 
     public Methods(ArrayList<StockObject> stockArrayList,
-
             ArrayList<FlowObject> flowArrayList,
             ArrayList<VariableObject> variableArrayList, double t0,
             double tf, double stepSize, String choice) {
-       
 
-
-        StockObject stock; 
+        StockObject stock;
         VariableObject var;
-
+        mxGraph graph = MainForm.getGraph();
+        Object node = graph.createVertex(null, null, "t", 0, 0, 100, 50, "Time");
+        VariableObject time = new VariableObject(node, "t", "t", Double.toString(t0), "0", "0");
         //for each stock get the stock initial values and add to the argumentList
         for (StockObject stockArrayList1 : stockArrayList) {
             stock = (StockObject) stockArrayList1; //get initial value
@@ -73,6 +72,7 @@ public final class Methods  {
             var = (VariableObject) variableArrayList1;
             variableArgList.add(var.getVarArg());
         }
+        variableArgList.add(time.getVarArg());
         //the user choice of numerical analysis method is sent to these if statements
         if ("rk4".equals(choice)) {
             data = rk4(t0, tf, stepSize, argumentList, variableArgList, stockArrayList, flowArrayList);
@@ -81,18 +81,8 @@ public final class Methods  {
         } else {
             data = eulers(t0, tf, stepSize, argumentList, variableArgList, stockArrayList, flowArrayList);
         }
-         // label the string array for columns
-        String stockNames="Time,";
-        for(int x=0;x<stockArrayList.size();x++)
-        {
-            stockNames+=argumentList.get(x).getArgumentName()+",";
-        }
-        
-        String columns[]=stockNames.split(",");
-        DefaultTableModel tableModel = new DefaultTableModel(0, stockArrayList.size()+1);
-        tableModel.setColumnIdentifiers(columns); // set the labels
+
     }
-    
 
     public XYSeriesCollection returnData() {
         return data;
@@ -102,12 +92,7 @@ public final class Methods  {
         return tableModel;
     }
 
-    //this method is an attempt to reset data. doesnt help the bug yet...
-    /*public void ResetData() {
-        data = new XYSeriesCollection();
-    }/*/
-
-    public XYSeriesCollection rk4(double t0, double tF, double stepSize, 
+    public XYSeriesCollection rk4(double t0, double tF, double stepSize,
             ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList,
             ArrayList<StockObject> stockArrayList, ArrayList<FlowObject> flowArrayList) {
 
@@ -118,8 +103,9 @@ public final class Methods  {
         for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j].clone();
         }
-        int numSteps = (int)((tF - t0) / stepSize);
+        int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
+        //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -154,12 +140,6 @@ public final class Methods  {
         }
 
         final XYSeriesCollection data = new XYSeriesCollection();
-        //create strings to hold table data
-        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-        String[] temp = {" ", " "};
-        for (int i = 0; i <= stockArrayList.size(); i++) {
-            tableStrings.add(temp);
-        }
 
         //add initial values to series
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -167,12 +147,24 @@ public final class Methods  {
         }
 
         int numOfStocks = stockArrayList.size();
-        double value=0.0;
+        double value;
+
+        // Generates a string to represent the column headers.
+        // The first part of the string aka x-axis will always be time
+        String stockNames = "Time,";
+        for (int x = 0; x < stockArrayList.size(); x++) {
+            stockNames += argumentList.get(x).getArgumentName() + ",";
+        }
+        String[] tableStrings = new String[stockArrayList.size() + 1];
+        String columns[] = stockNames.split(",");
+        tableModel = new DefaultTableModel(0, stockArrayList.size() + 1);
+        tableModel.setColumnIdentifiers(columns); // set the column headers
 
         for (int n = 0; n < numSteps; n++) {
-
-            t = t + stepSize;
-
+            t = t0 + (n*stepSize);
+            variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+            //t = Math.ceil(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
+            
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
 
@@ -183,8 +175,8 @@ public final class Methods  {
 
             //next let's find k2:
             for (int i = 0; i < numOfStocks; i++) {
-
-                value = (argumentList.get(i).getArgumentValue() + (k1.get(i)*stepSize/2));
+                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+(stepSize/2));
+                value = (argumentList.get(i).getArgumentValue() + (k1.get(i)/ 2));
                 aTempArgArrayList.get(i).setArgumentValue(value);
 
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
@@ -195,8 +187,8 @@ public final class Methods  {
 
             //next let's find k3:
             for (int i = 0; i < numOfStocks; i++) {
-
-                value = argumentList.get(i).getArgumentValue() + (k2.get(i)*stepSize/2);
+                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+(stepSize/2));
+                value = argumentList.get(i).getArgumentValue() + (k2.get(i)/ 2);
                 aTempArgArrayList.get(i).setArgumentValue(value);
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
             }
@@ -206,8 +198,8 @@ public final class Methods  {
 
             //next let's find k4:
             for (int i = 0; i < numOfStocks; i++) {
-
-                value = argumentList.get(i).getArgumentValue() + (k3.get(i)*stepSize);
+                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+stepSize);
+                value = argumentList.get(i).getArgumentValue() + (k3.get(i) );
                 aTempArgArrayList.get(i).setArgumentValue(value);
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
             }
@@ -219,21 +211,23 @@ public final class Methods  {
             for (int i = 0; i < numOfStocks; i++) {
 
                 value = argumentList.get(i).getArgumentValue() + ((k1.get(i) + (2 * k2.get(i)) + (2 * k3.get(i)) + k4.get(i)) / 6);
+                //value = Math.ceil(value * 1000000) / 1000000;
                 argumentList.get(i).setArgumentValue(value);
-
             }
-
-            double x = n + 1;
+            
+            int row = n + 1;
+            //double tablex=row*stepSize;
+            //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
+            tableStrings[0] = Double.toString(row*stepSize);
+            for (int col = 0; col < stockArrayList.size(); col++) {   
+                //tableStrings[col + 1] = Double.toString(Math.floor(argumentList.get(col).getArgumentValue()* Math.pow(10,cutoff)) / Math.pow(10,cutoff));
+                tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
+            }
+            tableModel.addRow(tableStrings);
             for (int i = 0; i < stockArrayList.size(); i++) {
-                series.get(i).add(x*stepSize, argumentList.get(i).getArgumentValue());
+                series.get(i).add(t, argumentList.get(i).getArgumentValue());
             }
-            for(int k = 0; k < argumentList.size();k++){
-                for (int i = 0; i < stockArrayList.size(); i++) {
-                    tableStrings.get(i)[0] = Double.toString(x*stepSize);
-                    tableStrings.get(i)[1] = Double.toString(argumentList.get(i).getArgumentValue());
-                    tableModel.addRow(tableStrings.get(i));
-                }
-            }
+
         }
         for (int i = 0; i < stockArrayList.size(); i++) {
             data.addSeries(series.get(i));
@@ -241,8 +235,8 @@ public final class Methods  {
         return data;
     }
 
-    public XYSeriesCollection rk2(double t0, double tF, double stepSize, 
-            ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList, 
+    public XYSeriesCollection rk2(double t0, double tF, double stepSize,
+            ArrayList<Argument> argumentList, ArrayList<Argument> variableArgList,
             ArrayList<StockObject> stockArrayList, ArrayList<FlowObject> flowArrayList) {
 
         //Used to help create the tempvarlist
@@ -253,8 +247,9 @@ public final class Methods  {
             aTempVarList[j] = aVarList[j].clone();
         }
         //double numSteps = (tF - t0) / stepSize;
-        int numSteps = (int)((tF - t0) / stepSize);
+        int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
+        //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -265,7 +260,7 @@ public final class Methods  {
 
         ArrayList<Double> k2 = new ArrayList<Double>();
 
-        //idea is to set k1 through k4 ArrayLists to double values of 0
+        //idea is to set k1 through k2 ArrayLists to double values of 0
         //used to have stockArrayList.size()
         for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
@@ -282,12 +277,6 @@ public final class Methods  {
         }
 
         final XYSeriesCollection data = new XYSeriesCollection();
-        //create strings to hold table data
-        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-        String[] temp = {" ", " "};
-        for (int i = 0; i <= stockArrayList.size(); i++) {
-            tableStrings.add(temp);
-        }
 
         //add initial values to series
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -297,8 +286,20 @@ public final class Methods  {
         int numOfStocks = stockArrayList.size();
         double value;
 
+        // label the string array for columns
+        String stockNames = "Time,";
+        for (int x = 0; x < stockArrayList.size(); x++) {
+            stockNames += argumentList.get(x).getArgumentName() + ",";
+        }
+        String[] tableStrings = new String[stockArrayList.size() + 1];
+        String columns[] = stockNames.split(",");
+        tableModel = new DefaultTableModel(0, stockArrayList.size() + 1);
+        tableModel.setColumnIdentifiers(columns); // set the labels
+
         for (int n = 0; n < numSteps; n++) {
-            t = t + stepSize;
+             t = t0 + (n*stepSize);
+             variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+            //t = Math.ceil(t * 10000) / 10000;
 
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
@@ -310,8 +311,8 @@ public final class Methods  {
 
             //next let's find k2:
             for (int i = 0; i < numOfStocks; i++) {
-
-                value = (argumentList.get(i).getArgumentValue() + (k1.get(i)*stepSize));
+                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+stepSize);
+                value = (argumentList.get(i).getArgumentValue() + (k1.get(i)));
                 aTempArgArrayList.get(i).setArgumentValue(value);
 
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
@@ -322,20 +323,25 @@ public final class Methods  {
             for (int i = 0; i < numOfStocks; i++) {
 
                 value = (argumentList.get(i).getArgumentValue() + ((k1.get(i) + k2.get(i)) / 2));
+                //value = Math.ceil(value * 10000) / 10000;
                 argumentList.get(i).setArgumentValue(value);
 
             }
-            double x = n + 1;
+
+            int row = n + 1;
+            //double tablex=row*stepSize;
+            //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
+            tableStrings[0] = Double.toString(row*stepSize);
+            for (int col = 0; col < stockArrayList.size(); col++) {
+                tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
+                
+            }
+            tableModel.addRow(tableStrings);
 
             for (int i = 0; i < stockArrayList.size(); i++) {
-                series.get(i).add(x*stepSize, argumentList.get(i).getArgumentValue());
+                series.get(i).add(t, argumentList.get(i).getArgumentValue());
             }
 
-            for (int i = 0; i < stockArrayList.size(); i++) {
-                tableStrings.get(i)[0] = Double.toString(x*stepSize);
-                tableStrings.get(i)[1] = Double.toString(argumentList.get(0).getArgumentValue());
-                tableModel.addRow(tableStrings.get(i));
-            }
         }
         for (int i = 0; i < stockArrayList.size(); i++) {
             data.addSeries(series.get(i));
@@ -344,7 +350,7 @@ public final class Methods  {
     }
 
     public XYSeriesCollection eulers(double t0, double tF, double stepSize, ArrayList<Argument> argumentList,
-            ArrayList<Argument> variableArgList, ArrayList<StockObject> stockArrayList, 
+            ArrayList<Argument> variableArgList, ArrayList<StockObject> stockArrayList,
             ArrayList<FlowObject> flowArrayList) {
 
         //Used to help create the tempvarlist
@@ -354,9 +360,9 @@ public final class Methods  {
         for (int j = 0; j < aVarList.length; j++) {
             aTempVarList[j] = aVarList[j].clone();
         }
-        //double numSteps = (tF - t0) / stepSize;
-        int numSteps = (int)((tF - t0) / stepSize);
+        int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
+        int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -365,7 +371,7 @@ public final class Methods  {
 
         ArrayList<Double> k1 = new ArrayList<Double>();
 
-        //idea is to set k1 through k4 ArrayLists to double values of 0
+        //idea is to set k1 to double 0
         for (int x = 0; x < stockArrayList.size(); x++) {
             k1.add(0.0);
         }
@@ -381,11 +387,6 @@ public final class Methods  {
 
         final XYSeriesCollection data = new XYSeriesCollection();
         //create strings to hold table data
-        ArrayList<String[]> tableStrings = new ArrayList<String[]>();
-        String[] temp = {" ", " "};
-        for (int i = 0; i <= stockArrayList.size(); i++) {
-            tableStrings.add(temp);
-        }
 
         //add initial values to series
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -393,9 +394,20 @@ public final class Methods  {
         }
         int numOfStocks = stockArrayList.size();
         double value;
+        // label the string array for columns
+        String stockNames = "Time,";
+        for (int x = 0; x < stockArrayList.size(); x++) {
+            stockNames += argumentList.get(x).getArgumentName() + ",";
+        }
+        String[] tableStrings = new String[stockArrayList.size() + 1];
+        String columns[] = stockNames.split(",");
+        tableModel = new DefaultTableModel(0, stockArrayList.size() + 1);
+        tableModel.setColumnIdentifiers(columns); // set the labels
 
         for (int n = 0; n < numSteps; n++) {
-            t = t + stepSize;
+           t = t0 + (n*stepSize);
+           variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+           // t = Math.ceil(t * 10000) / 10000;
 
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
@@ -408,19 +420,22 @@ public final class Methods  {
             for (int i = 0; i < numOfStocks; i++) {
 
                 value = argumentList.get(i).getArgumentValue() + (k1.get(i));
+                //value = Math.ceil(value * 10000) / 10000;
                 argumentList.get(i).setArgumentValue(value);
 
             }
-            double x = n + 1;
 
-            for (int i = 0; i < stockArrayList.size(); i++) {
-                series.get(i).add(x*stepSize, argumentList.get(i).getArgumentValue());
+            int row = n + 1;
+            //double tablex=row*stepSize;
+            //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
+            tableStrings[0] = Double.toString(row*stepSize);
+            for (int col = 0; col < stockArrayList.size(); col++) {
+                tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
             }
+            tableModel.addRow(tableStrings);
 
             for (int i = 0; i < stockArrayList.size(); i++) {
-                tableStrings.get(i)[0] = Double.toString(x*stepSize);
-                tableStrings.get(i)[1] = Double.toString(argumentList.get(0).getArgumentValue());
-                tableModel.addRow(tableStrings.get(i));
+                series.get(i).add(t, argumentList.get(i).getArgumentValue());
             }
         }
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -429,7 +444,6 @@ public final class Methods  {
         return data;
     }
 
-    
     //This method handles the actual equation the user creates.
     public double[] RightHandSide(ArrayList<Argument> variableArgList, ArrayList<Argument> stockArgList, ArrayList<FlowObject> flowArrayList) {
 
@@ -450,8 +464,8 @@ public final class Methods  {
                 FlowObject flow = flowArrayList.get(j);
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
-                e = new Expression(flow.getflowEquation(), globalvariables);
-                
+                e = new Expression(flow.getFlowEquation(), globalvariables);
+
                 ret[i] = e.calculate();
 
             }

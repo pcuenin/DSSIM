@@ -60,11 +60,20 @@ public class styleList {
     Hashtable<String, Object> ArrowU = new Hashtable<>();
     Hashtable<String, Object> ArrowD = new Hashtable<>();
     Hashtable<String, Object> ArrowL = new Hashtable<>();
+    Hashtable<String, Object> Time = new Hashtable<>();
     Map<String, Object> edgeStyle = new HashMap<String, Object>();
     Map<String, Object> edgeConStyle = new HashMap<String, Object>();
     
     styleList(MainForm mainform)
-    {        
+    {   
+        /*        
+        //creates a style for time 
+        Time.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
+        Time.put(mxConstants.STYLE_IMAGE, "file:Images/FlowImg.png");
+        Time.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
+        Time.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
+        Time.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);*/
+        
         //creates a style for a flow. 
         Flow.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
         Flow.put(mxConstants.STYLE_IMAGE, "file:Images/FlowImg.png");

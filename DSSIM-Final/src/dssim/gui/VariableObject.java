@@ -31,25 +31,41 @@ import org.mariuszgromada.math.mxparser.Argument;
  */
 public class VariableObject extends SuperObject {
 
-    private String sVarDescrip;
+    private String sVarDesc;
+    private String sVarName;
     private String sVarInitial;
     //public String sFlowEquation;
     private Argument aVarArg;
+    private String x;
+    private String y;
 
-    public VariableObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
+    public VariableObject(Object graphobject, String inputname, String inputDescription, String inputinitial, String sVarX, String sVarY) {
         super(inputname, graphobject);
-//sObjJgraphName = graphobject.toString();
-        //sObjName = inputname;
-        sVarDescrip = inputsymbol;
+        //sObjJgraphName = graphobject.toString();
+        sVarName = inputname;
+        sVarDesc = inputDescription;
         sVarInitial = inputinitial;
         //oObj = graphobject;
         //will cause issue if user inputs into variable a string like "x*54"
         //may use if statement to check for what type of argument constructor to use to avoid errors
-        aVarArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+        aVarArg = new Argument(inputDescription, Double.parseDouble(inputinitial));
+        x = sVarX;
+        y = sVarY;
     }
-
+    public String getVarX(){
+        return x;
+    }
+  
+    public String getVarY(){
+        return y;
+    }
+    
     public Argument getVarArg() {
         return aVarArg;
+    }
+    
+    public String getVarName(){
+        return sVarName;
     }
 
     public void setVarArg(String symbol, String initial) {
@@ -57,11 +73,11 @@ public class VariableObject extends SuperObject {
     }
 
     public String getVarDescrip() {
-        return sVarDescrip;
+        return sVarDesc;
     }
 
     public void setVarDescrip(String newsymbol) {
-        sVarDescrip = newsymbol;
+        sVarDesc = newsymbol;
     }
 
     public String getVarInitial() {
@@ -70,7 +86,7 @@ public class VariableObject extends SuperObject {
 
     public void setVarInitial(String newinitial) {
         sVarInitial = newinitial;
-        setVarArg(sVarDescrip, sVarInitial);
+        setVarArg(sVarDesc, sVarInitial);
     }
 
 }

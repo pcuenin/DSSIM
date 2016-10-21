@@ -32,30 +32,43 @@ import org.mariuszgromada.math.mxparser.Argument;
 public class StockObject extends SuperObject {
 
     private String sStockDescrip; //for keeping the user entered symbol
+    private String sStockName;
     private String sStockInitial; //for keeping the initial value the user enters
     private Argument aStockArg; //Argument data type is from the mxparser library
+    private String x;
+    private String y;
 
     //stock object is created for the purposes right now as a variable that is represented in the generated graphs and tables
-    public StockObject(Object graphobject, String inputname, String inputsymbol, String inputinitial) {
+    public StockObject(Object graphobject, String inputname, String inputDescripton, String inputinitial, String sStockX, String sStockY) {
 
         super(inputname, graphobject);
         //stock name from user
-        //sObjName = inputname;
+        sStockName = inputname;
         //jgraph object cell name
         //sObjJgraphName = graphobject.toString();
         //stock symbol from user
-        sStockDescrip = inputsymbol;
+        sStockDescrip = inputDescripton;
         //stock initial value input from user. for reference later and building parser argument
         sStockInitial = inputinitial;
         //object given from jgraph
         //oObj = graphobject;
+        x = sStockX;
+        y = sStockY;
         
 
-        aStockArg = new Argument(inputsymbol, Double.parseDouble(inputinitial));
+        aStockArg = new Argument(inputDescripton, Double.parseDouble(inputinitial));
 
 
     }
-
+    public String getStockX(){
+        return x;
+    }
+    public String getStockY(){
+        return y;
+    }
+    public String getStockName(){
+        return sStockName;
+    }
 
     //return stock arg of argument type
     public Argument getStockArg() {
@@ -67,12 +80,12 @@ public class StockObject extends SuperObject {
         aStockArg = new Argument(symbol, Double.parseDouble(initial));
     }
 
-    //get stock symbol
+    //get stock desc
     public String getStockDescrip() {
         return sStockDescrip;
     }
 
-    //set stock symbol
+    //set stock desc
     public void setStockDescrip(String newsymbol) {
         sStockDescrip = newsymbol;
     }
