@@ -41,6 +41,13 @@ public class ArrowObject extends SuperObject {
             super(inputname, graphobject);
 
         }
+        public ArrowObject(String inputname, Object graphobject, SuperObject from,SuperObject to) {
+            super(inputname, graphobject);
+            superObjectTo = to;
+            superObjectFrom = from;
 
+        }
+
+        
         
     }
