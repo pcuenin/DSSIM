@@ -27,6 +27,7 @@ package dssim;
  *
  * @author Lander University
  */
+import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
@@ -54,10 +55,18 @@ import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeriesCollection;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
+
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
 import org.json.simple.parser.JSONParser;
+
+
+import dssim.gui.ArrowDialog;
+import dssim.gui.FlowDialog;
+import dssim.gui.StockDialog;
+import dssim.gui.VariableDialog;
+import java.util.Map;
 
 
 public class MainForm extends javax.swing.JFrame {
@@ -120,7 +129,7 @@ public class MainForm extends javax.swing.JFrame {
 
         graphComponent = new mxGraphComponent(graph);
         graphComponent.setGridVisible(true);
-        jScrollPane1.setViewportView(graphComponent); // might be causing issue with cursor PMC
+        jScrollPane1.setViewportView(graphComponent); //removed this becuase it was blocking the custom cursor
 
         // allow the user to use the mouse to navigate
         graphComponent.getGraphControl().addMouseListener(new MouseAdapter() {
@@ -131,9 +140,54 @@ public class MainForm extends javax.swing.JFrame {
             //sets up what happens when a user clicks on the graph to place an object
             public void mousePressed(MouseEvent e) {
                 cell = graphComponent.getCellAt(e.getX(), e.getY());
+
+                if (e.getClickCount() >= 2) { 
+                    
+                    // if the item is double clicked PMC 100716
+                    //figure out what type of object they double clicked
+                    // args back when you figure that out
+                    Object obj = graph.getSelectionCell();//gives the object you have clicked on
+                    Map<String, Object> objMap = graph.getCellStyle(obj); //
+                    mxCell mxobj = (mxCell) obj;// cast generic object to be a mxCell
+                    String objst = (String) mxobj.getStyle(); // mull the mxCell id to use
+
+                    if (objst.equals("Stock")) {
+                        //do stock dialog
+                        StockObject so = getStock(mxobj);
+                        StockDialog dialog = new StockDialog(new javax.swing.JFrame(), true, so, variableArrayList);
+                        dialog.setVisible(true);
+                        
+                    } else if (objst.equals("Flow")) {
+                        // do Flow dialog
+                        FlowObject fo = getFlow(mxobj);
+                        FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, fo);
+                        dialog.setVisible(true);
+                        
+                    } else if (objst.equals("Arrow")) {  // not flow not stock must be arrow
+                        ArrowObject ao = getArrow(mxobj); // find the arrow object from the mxcell
+                        ArrowDialog dialog = new ArrowDialog(new javax.swing.JFrame(), true, ao);
+                        dialog.setVisible(true);
+                        
+
+                        //ArrowDialog.main(ao); // pass the arrow object to the the arrow dialog
+                    } else {
+                        // do variable dialog
+                        VariableObject vo = getVar(mxobj); // find the arrow object from the mxcell
+                        VariableDialog dialog = new VariableDialog(new javax.swing.JFrame(), true, vo);
+                        dialog.setVisible(true);
+
+                    }
+                    // for look through each stock/flow/arrow array to find the object 
+                    //
+                    // then call the form based on the result
+
+                     // use graph to access info about vertex
+                    //how are the objects stored... need visual
+                }
+
                 // different objectLoc will call different Add functions
                 if (objectLoc == 1) {
-                    stockInfoForm();
+                    
                     AddStock(inputname, style, inputsymbol, inputinitial, inputequation, e.getX(), e.getY());
                     objectLoc = -1;
                 } else if (objectLoc == 2) {
@@ -171,6 +225,7 @@ public class MainForm extends javax.swing.JFrame {
                     objectLoc = -1;
                 }
             }
+
         });
 
         //This initalizes the stylesheets from stylelist.java class for each object
@@ -194,7 +249,13 @@ public class MainForm extends javax.swing.JFrame {
         Point point = new Point(0, 0);
         Cursor cursor = toolkit.createCustomCursor(img, point, "Cursor");
 
+
         graphComponent.setCursor(cursor); // still doesn't work PMC
+
+        //jPanel1.setCursor(cursor); // still doesn't work PMC
+        //graphComponent.setCursor(cursor);
+        this.jScrollPane1.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+
     }
 
 //This method will add a stock to the graph
@@ -212,6 +273,7 @@ public class MainForm extends javax.swing.JFrame {
         StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial,x+"",y+"");
         stockArrayList.add(stockobject);
     }
+
    // This method will add a stock to the graph from a save file
     void AddStock(StockObject stock) {
         //Object parent = graph.getDefaultParent();
@@ -229,6 +291,62 @@ public class MainForm extends javax.swing.JFrame {
         stockArrayList.add(stockobject);*/
     }
 // This method will add a flow to the graph from the user input
+
+// This method will add a flow to the graph
+
+    // get arrow object from mxCell
+    ArrowObject getArrow(mxCell mxc) {
+        ArrowObject ao;
+        for (int i = 0; i < arrowArrayList.size(); i++) {
+            ao = arrowArrayList.get(i);
+            if (ao.getO_Object() == mxc) {
+                return ao;
+            }
+        }
+
+        return null;
+    }
+    
+     // get stock object from mxCell
+    StockObject getStock(mxCell mxc) {
+        StockObject so;
+        for (int i = 0; i < stockArrayList.size(); i++) {
+            so = stockArrayList.get(i);
+            if (so.getO_Object() == mxc) {
+                return so;
+            }
+        }
+
+        return null;
+    }
+    
+    // get stock flow from mxCell
+    FlowObject getFlow(mxCell mxc) {
+        FlowObject fo;
+        for (int i = 0; i < flowArrayList.size(); i++) {
+            fo = flowArrayList.get(i);
+            if (fo.getO_Object() == mxc) {
+                return fo;
+            }
+        }
+
+        return null;
+    }
+    
+    // get variable from mxCell
+    VariableObject getVar(mxCell mxc) {
+        VariableObject vo;
+        for (int i = 0; i < variableArrayList.size(); i++) {
+            vo = variableArrayList.get(i);
+            if (vo.getO_Object() == mxc) {
+                return vo;
+            }
+        }
+
+        return null;
+    }
+
+
     void AddFlow(String name, String styleName, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -240,7 +358,12 @@ public class MainForm extends javax.swing.JFrame {
             Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
             FlowObject flowobject = new FlowObject(node, inputname, inputequation,x+"",y+"");
             flowArrayList.add(flowobject);
+
             
+
+            mxCell flow = (mxCell) node;
+            flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
+
         } finally {
             graph.getModel().endUpdate();
         }
@@ -266,6 +389,8 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().beginUpdate();
         try {
             Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
+            ArrowObject arrowobject = new ArrowObject("arrow",node);
+            this.arrowArrayList.add(arrowobject);
         } finally {
             graph.getModel().endUpdate();
         }
@@ -473,6 +598,8 @@ public class MainForm extends javax.swing.JFrame {
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
+        jScrollPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jScrollPane1.setName(""); // NOI18N
 
         jSeparator4.setBackground(new java.awt.Color(51, 51, 51));
         jSeparator4.setForeground(new java.awt.Color(51, 51, 51));
@@ -979,7 +1106,7 @@ public class MainForm extends javax.swing.JFrame {
         //changed amount of stocks a different way, like by taking the size of the stockArrayList
 
         style = "Stock";
-        CustomCursor();
+        //CustomCursor(); need to make work
 
         /* I commented this out to see if I could move the form later in the flow
          //check if the user would like to input information
@@ -1017,6 +1144,7 @@ public class MainForm extends javax.swing.JFrame {
          //updates objectLoc for mouse event on where to place the object on the graph
          */
         objectLoc = 1;
+        stockInfoForm();
 
     }//GEN-LAST:event_stockBtnActionPerformed
     private void stockInfoForm() {
@@ -1041,7 +1169,7 @@ public class MainForm extends javax.swing.JFrame {
         addStock.add(new JLabel("Stock Initial Value"));
         addStock.add(stockInitial);
 
-        int option = JOptionPane.showConfirmDialog(null, addStock);
+        int option = JOptionPane.showConfirmDialog(null, addStock, "Add a Stock", JOptionPane.PLAIN_MESSAGE);
         inputname = stockName.getText();
         inputsymbol = stockDescrip.getText();
         inputinitial = stockInitial.getText();
@@ -1080,11 +1208,10 @@ public class MainForm extends javax.swing.JFrame {
         objectLoc = 4;
         inputValue = "0.0";
         //check if the user would like to input the information about the variable
-        JPanel check = new JPanel();
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this Variable?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
+        //JPanel check = new JPanel();
+        //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
+        //check.add(new JLabel("Would you like to input information for this Variable?"));
+        
             //if yes, get info
             //Base values in case someone hits enter to fast, so it wont throw errors
             JTextField varName = new JTextField("Variable" + variableArrayList.size());
@@ -1098,17 +1225,11 @@ public class MainForm extends javax.swing.JFrame {
             addVar.add(varSymbol);
             addVar.add(new JLabel("Variable Value"));
             addVar.add(varValue);
-            int option = JOptionPane.showConfirmDialog(null, addVar);
+            int option = JOptionPane.showConfirmDialog(null, addVar,"Add a Variable", JOptionPane.PLAIN_MESSAGE);
             inputname = varName.getText();
             inputValue = varValue.getText();
             inputsymbol = varSymbol.getText();
-        } else {
-            //blank values, variable name increments
-            inputname = "Variable" + variableArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputValue = "0.0";
-            inputsymbol = "v" + +variableArrayList.size();
-        }
+        
     }//GEN-LAST:event_variableBtnActionPerformed
 
     private void closeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeBtnActionPerformed
@@ -1161,41 +1282,43 @@ public class MainForm extends javax.swing.JFrame {
     }//GEN-LAST:event_StockMenuItemActionPerformed
     public static mxGraph getGraph(){
         return graph;
-    }
+    } 
     
     private void DeleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteMenuItemActionPerformed
         // TODO add your handling code here:
+        deleteBtnActionPerformed(evt);
 
         //delete method is the same as the delete above. It is just an extra one in the top menus
-        graph.getModel().remove(cell);
-        System.out.println(cell.toString());
+        /*graph.getModel().remove(cell);
+         System.out.println(cell.toString());
 
-        for (int i = 0; i < stockArrayList.size(); i++) {
+         for (int i = 0; i < stockArrayList.size(); i++) {
 
-            if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-                stockArrayList.remove(i);
-            }
-        }
-        for (int i = 0; i < flowArrayList.size(); i++) {
+         if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         stockArrayList.remove(i);
+         }
+         }
+         for (int i = 0; i < flowArrayList.size(); i++) {
 
-            if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-                flowArrayList.remove(i);
-            }
-        }
-        for (int i = 0; i < arrowArrayList.size(); i++) {
+         if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         flowArrayList.remove(i);
+         }
+         }
+         for (int i = 0; i < arrowArrayList.size(); i++) {
 
-            if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-                arrowArrayList.remove(i);
-            }
-        }
-        for (int i = 0; i < variableArrayList.size(); i++) {
+         if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         arrowArrayList.remove(i);
+         }
+         }
+         for (int i = 0; i < variableArrayList.size(); i++) {
 
-            if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-                variableArrayList.remove(i);
-            }
-        }
-        deleteBtn.setSelected(false);
+         if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         variableArrayList.remove(i);
+         }
+         }
+         deleteBtn.setSelected(false);*/
     }//GEN-LAST:event_DeleteMenuItemActionPerformed
+
 
     private void methodChoiceComboActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_methodChoiceComboActionPerformed
         if (methodChoiceCombo.getSelectedIndex() == 0) {
@@ -1278,31 +1401,28 @@ public class MainForm extends javax.swing.JFrame {
     private void flowBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_flowBtnActionPerformed
         // TODO add your handling code here:
         style = "Flow";
-        JPanel check = new JPanel();
+        //JPanel check = new JPanel();
         ////see if user would like to input information
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this Flow?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
+        //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
+        //check.add(new JLabel("Would you like to input information for this Flow?"));
+        //int yN = JOptionPane.showConfirmDialog(null, check);
+        
             //if yes, get info
             //Base values in case someone hits enter to fast, so it wont throw errors
             JTextField flowName = new JTextField("Flow" + flowArrayList.size());
             JTextField flowEquation = new JTextField("");
             JPanel addFlow = new JPanel();
             addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
+           
             addFlow.add(new JLabel("Flow Name"));
             addFlow.add(flowName);
             addFlow.add(new JLabel("Flow Equation"));
             addFlow.add(flowEquation);
-            int option = JOptionPane.showConfirmDialog(null, addFlow);
+            
+            int option = JOptionPane.showConfirmDialog(null, addFlow,"Add a Flow", JOptionPane.PLAIN_MESSAGE);
             inputname = flowName.getText();
             inputequation = flowEquation.getText();
-        } else {
-            //blank values, stock name increments
-            inputname = "Flow" + flowArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputequation = "";
-        }
+        
         objectLoc = 2;
         //AddFlow(response, style);
     }//GEN-LAST:event_flowBtnActionPerformed
@@ -1314,33 +1434,34 @@ public class MainForm extends javax.swing.JFrame {
     private void FlowMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FlowMenuItemActionPerformed
         // TODO add your handling code here:
         //This method is the same ad the flowBtn above. It is just an extra one in the top menus
-        style = "Flow";
-        JPanel check = new JPanel();
-        //see if user would like to input information
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this Flow?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField flowName = new JTextField("Flow" + flowArrayList.size());
-            JTextField flowEquation = new JTextField("");
-            JPanel addFlow = new JPanel();
-            addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
-            addFlow.add(new JLabel("Flow Name"));
-            addFlow.add(flowName);
-            addFlow.add(new JLabel("Flow Equation"));
-            addFlow.add(flowEquation);
-            int option = JOptionPane.showConfirmDialog(null, addFlow);
-            inputname = flowName.getText();
-            inputequation = flowEquation.getText();
-        } else {
-            //blank values, stock name increments
-            inputname = "Flow" + flowArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputequation = "";
-        }
-        objectLoc = 2;
+        flowBtnActionPerformed(evt);
+        /*style = "Flow";
+         JPanel check = new JPanel();
+         //see if user would like to input information
+         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
+         check.add(new JLabel("Would you like to input information for this Flow?"));
+         int yN = JOptionPane.showConfirmDialog(null, check);
+         if (yN == 0) {
+         //if yes, get info
+         //Base values in case someone hits enter to fast, so it wont throw errors
+         JTextField flowName = new JTextField("Flow" + flowArrayList.size());
+         JTextField flowEquation = new JTextField("");
+         JPanel addFlow = new JPanel();
+         addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
+         addFlow.add(new JLabel("Flow Name"));
+         addFlow.add(flowName);
+         addFlow.add(new JLabel("Flow Equation"));
+         addFlow.add(flowEquation);
+         int option = JOptionPane.showConfirmDialog(null, addFlow);
+         inputname = flowName.getText();
+         inputequation = flowEquation.getText();
+         } else {
+         //blank values, stock name increments
+         inputname = "Flow" + flowArrayList.size();
+         //these can NOT be "", they show as null and go haywire
+         inputequation = "";
+         }
+         objectLoc = 2;*/
     }//GEN-LAST:event_FlowMenuItemActionPerformed
 
     private void showAllVariableBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllVariableBtnActionPerformed
@@ -1504,40 +1625,43 @@ public class MainForm extends javax.swing.JFrame {
 
     private void VariableMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VariableMenuItemActionPerformed
         // TODO add your handling code here:
+        variableBtnActionPerformed(evt);
+        /*
+        
 
-        //create variable through the menu at the top of the screen same as above
-        style = "Variable";
-        objectLoc = 4;
-        inputValue = "0.0";
-        JPanel check = new JPanel();
-        check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-        check.add(new JLabel("Would you like to input information for this Variable?"));
-        int yN = JOptionPane.showConfirmDialog(null, check);
-        if (yN == 0) {
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField varName = new JTextField("Variable" + variableArrayList.size());
-            JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
-            JTextField varValue = new JTextField("");
-            JPanel addVar = new JPanel();
-            addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
-            addVar.add(new JLabel("Variable Name"));
-            addVar.add(varName);
-            addVar.add(new JLabel("Variable Symbol"));
-            addVar.add(varSymbol);
-            addVar.add(new JLabel("Variable Value"));
-            addVar.add(varValue);
-            int option = JOptionPane.showConfirmDialog(null, addVar);
-            inputname = varName.getText();
-            inputValue = varValue.getText();
-            inputsymbol = varSymbol.getText();
-        } else {
-            //blank values, variable name increments
-            inputname = "Variable" + variableArrayList.size();
-            //these can NOT be "", they show as null and go haywire
-            inputValue = "0.0";
-            inputsymbol = "v" + +variableArrayList.size();
-        }
+         //create variable through the menu at the top of the screen same as above
+         style = "Variable";
+         objectLoc = 4;
+         inputValue = "0.0";
+         JPanel check = new JPanel();
+         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
+         check.add(new JLabel("Would you like to input information for this Variable?"));
+         int yN = JOptionPane.showConfirmDialog(null, check);
+         if (yN == 0) {
+         //if yes, get info
+         //Base values in case someone hits enter to fast, so it wont throw errors
+         JTextField varName = new JTextField("Variable" + variableArrayList.size());
+         JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
+         JTextField varValue = new JTextField("");
+         JPanel addVar = new JPanel();
+         addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
+         addVar.add(new JLabel("Variable Name"));
+         addVar.add(varName);
+         addVar.add(new JLabel("Variable Symbol"));
+         addVar.add(varSymbol);
+         addVar.add(new JLabel("Variable Value"));
+         addVar.add(varValue);
+         int option = JOptionPane.showConfirmDialog(null, addVar);
+         inputname = varName.getText();
+         inputValue = varValue.getText();
+         inputsymbol = varSymbol.getText();
+         } else {
+         //blank values, variable name increments
+         inputname = "Variable" + variableArrayList.size();
+         //these can NOT be "", they show as null and go haywire
+         inputValue = "0.0";
+         inputsymbol = "v" + +variableArrayList.size();
+         }*/
     }//GEN-LAST:event_VariableMenuItemActionPerformed
 
     private void arrowComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowComboBoxActionPerformed
