@@ -105,7 +105,7 @@ public final class Methods {
         }
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
-        //int cutoff = String.valueOf(t).length()-1;
+        int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -162,9 +162,9 @@ public final class Methods {
 
         for (int n = 0; n < numSteps; n++) {
             t = t0 + (n*stepSize);
-            variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
-            //t = Math.ceil(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
             
+            t = Math.floor(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
+            variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
 

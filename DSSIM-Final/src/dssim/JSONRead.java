@@ -163,7 +163,36 @@ public class JSONRead {
     }
     /*
     public ArrowObject readArrow(){
+        Object obj = parser.parse(new FileReader(filename));
+
+        JSONObject ms = (JSONObject) obj;
         
         return arr;
     }*/
+    public static String[] readSettings(JSONParser parser, File filename){
+        String[] settings = new String[3];
+        try{
+        Object obj = parser.parse(new FileReader(filename));
+        JSONObject mSettings = (JSONObject) obj;
+        JSONArray msArray = (JSONArray) mSettings.get("Model Settings");
+        Iterator it = msArray.iterator();
+        while(it.hasNext())
+            {
+                JSONObject ms = (JSONObject) it.next();
+                settings[0] = (String) ms.get("init");
+                settings[1] = (String) ms.get("final");
+                settings[2] = (String) ms.get("timestep");
+            }
+        }
+        catch(FileNotFoundException e){
+            e.printStackTrace();
+        }
+        catch(IOException e){
+            e.printStackTrace();
+        }
+        catch(ParseException e){
+            e.printStackTrace();
+        }
+        return settings;
+    }
 }
