@@ -29,6 +29,7 @@ import dssim.gui.ArrowObject;
 import dssim.gui.FlowObject;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
+import javax.swing.JFrame;
 
 /**
  *
@@ -63,7 +64,7 @@ public class JSONSave {
         JSONObject varObj = new JSONObject();
         varObj.put("name",var.getVarName());
         //varObj.put("arg",var.getVarArg());
-        //varObj.put("obj",var.getO_Object());
+        //varObj.1put("obj",var.getO_Object());
         varObj.put("desc",var.getVarDescrip());
         varObj.put("init",var.getVarInitial());
         mxCell varGeo = (mxCell)var.getO_Object();
@@ -75,6 +76,14 @@ public class JSONSave {
     public JSONObject saveArrow(ArrowObject arrow){
         JSONObject arrowObj = new JSONObject();
         return arrowObj;
+    }
+    
+    public JSONObject saveSettings(ModelSettings ms){
+        JSONObject settings = new JSONObject();
+        settings.put("init",ms.getInitialTime());
+        settings.put("final",ms.getFinalTime());
+        settings.put("timestep",ms.getTimeStep());
+        return settings;
     }
         
 }

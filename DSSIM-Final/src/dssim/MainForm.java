@@ -961,7 +961,6 @@ public class MainForm extends javax.swing.JFrame {
         //Brings up file chooser as to where to save objects
         JSONSave savefile = new JSONSave();
         int returnVal = fc.showSaveDialog(MainForm.this);
-        //int lines = stockArrayList.size()+flowArrayList.size()+variableArrayList.size()+arrowArrayList.size();
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             try {  
               
@@ -1012,9 +1011,11 @@ public class MainForm extends javax.swing.JFrame {
             {
                
                 
-            }
-              
-            
+            }   
+            fileWriter.write("\n"); 
+            fileWriter.write("\"Model Settings\" : \n"); 
+            JSONObject settings = savefile.saveSettings(modelSettings);
+            fileWriter.write(settings.toJSONString()+", \n");  
             fileWriter.write("}");   
             fileWriter.close();
             System.out.println("Finished writing file");
@@ -1781,7 +1782,10 @@ public class MainForm extends javax.swing.JFrame {
         {
             AddVariable(variableArrayList.get(i));
         }
-        
+        String[] mSettings = JSONRead.readSettings(parser, srcFile);
+        modelSettings.initialTime=mSettings[0];
+        modelSettings.finalTime=mSettings[1];
+        modelSettings.timeStep=mSettings[2];
     }//GEN-LAST:event_OpenMenuItemActionPerformed
 
     /**
