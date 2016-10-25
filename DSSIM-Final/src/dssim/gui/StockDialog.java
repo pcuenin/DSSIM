@@ -90,6 +90,8 @@ public class StockDialog extends javax.swing.JDialog {
 
         jLabelequation3.setText("Equation");
 
+        jTextFieldStockEquation1.setEditable(false);
+
         jLabelIV4.setText("Initial Value");
 
         jButtonCancel1.setText("Close");

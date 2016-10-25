@@ -536,6 +536,7 @@ public class MainForm extends javax.swing.JFrame {
         jButton3.setText("jButton3");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Dynamic System Simulator - DSSIM");
 
         jScrollPane1.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         jScrollPane1.setForeground(new java.awt.Color(255, 255, 255));
@@ -1041,7 +1042,11 @@ public class MainForm extends javax.swing.JFrame {
         addStock.add(new JLabel("Stock Initial Value"));
         addStock.add(stockInitial);
 
-        int option = JOptionPane.showConfirmDialog(null, addStock, "Add a Stock", JOptionPane.PLAIN_MESSAGE);
+        int option = JOptionPane.showConfirmDialog(null, addStock, "Add a Stock", JOptionPane.OK_CANCEL_OPTION);
+        if(option==JOptionPane.CANCEL_OPTION){
+            objectLoc =0;
+            return;
+        }
         inputname = stockName.getText();
         inputsymbol = stockDescrip.getText();
         inputinitial = stockInitial.getText();
@@ -1097,7 +1102,11 @@ public class MainForm extends javax.swing.JFrame {
             addVar.add(varSymbol);
             addVar.add(new JLabel("Variable Value"));
             addVar.add(varValue);
-            int option = JOptionPane.showConfirmDialog(null, addVar,"Add a Variable", JOptionPane.PLAIN_MESSAGE);
+            int option = JOptionPane.showConfirmDialog(null, addVar,"Add a Variable", JOptionPane.OK_CANCEL_OPTION);
+            if(option==JOptionPane.CANCEL_OPTION){
+            objectLoc =0;
+            return;
+        }
             inputname = varName.getText();
             inputValue = varValue.getText();
             inputsymbol = varSymbol.getText();
@@ -1288,7 +1297,11 @@ public class MainForm extends javax.swing.JFrame {
             addFlow.add(new JLabel("Flow Equation"));
             addFlow.add(flowEquation);
             
-            int option = JOptionPane.showConfirmDialog(null, addFlow,"Add a Flow", JOptionPane.PLAIN_MESSAGE);
+            int option = JOptionPane.showConfirmDialog(null, addFlow,"Add a Flow", JOptionPane.OK_CANCEL_OPTION);
+            if(option==JOptionPane.CANCEL_OPTION){
+            objectLoc =0;
+            return;
+        }
             inputname = flowName.getText();
             inputequation = flowEquation.getText();
         
