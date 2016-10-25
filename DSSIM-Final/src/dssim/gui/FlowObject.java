@@ -29,13 +29,16 @@ package dssim.gui;
  */
 public class FlowObject extends SuperObject {
 
-    private String sFlowDescrip;
+    private String sFlowName;
     private String sFlowEquation;
+    private String x;
+    private String y;
     // add from and to super object types
     SuperObject superObjectTo = null;
     SuperObject superObjectFrom = null;
+     
 
-    public FlowObject(Object graphobject, String inputname, String inputequation) {
+    public FlowObject(Object graphobject, String inputname, String inputequation,String sFlowX, String sFlowY) {
 
         //flow name from user
         //sObjName = inputname;
@@ -46,14 +49,26 @@ public class FlowObject extends SuperObject {
         //input equation from user. for rhs data building later
         super(inputname, graphobject);
         sFlowEquation = inputequation;
-
+        sFlowName = inputname;
+        x = sFlowX;
+        y = sFlowY;
+    }
+    public String getFlowX(){
+        return x;
+    }
+    public String getFlowY(){
+        return y;
     }
 
     //for use later by gui
   
 
-    public String getflowEquation() {
+    public String getFlowEquation() {
         return sFlowEquation;
+    }
+    
+    public String getFlowName(){
+        return sFlowName;
     }
 
     public void setFlowEquation(String newequation) {

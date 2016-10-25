@@ -41,8 +41,8 @@ public class ModelSettings extends javax.swing.JPanel {
      */
     //Initial values for the inital time, final time, and time step variables
     public String initialTime = "0";
-    public String finalTime = "0";
-    public String timeStep = "0";
+    public String finalTime = "1";
+    public String timeStep = "0.1";
     JFrame frame = null;
     public ModelSettings() {
        

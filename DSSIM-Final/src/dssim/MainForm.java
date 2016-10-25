@@ -31,6 +31,8 @@ import com.mxgraph.model.mxCell;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxStylesheet;
+import com.orsoncharts.util.json.JSONArray;
+import com.orsoncharts.util.json.JSONObject;
 import dssim.gui.ArrowObject;
 import dssim.gui.FlowObject;
 import java.awt.*;
@@ -53,11 +55,19 @@ import javax.swing.table.DefaultTableModel;
 import org.jfree.data.xy.XYSeriesCollection;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
+
+import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
+import org.json.simple.parser.JSONParser;
+
+
 import dssim.gui.ArrowDialog;
 import dssim.gui.FlowDialog;
 import dssim.gui.StockDialog;
 import dssim.gui.VariableDialog;
 import java.util.Map;
+
 
 public class MainForm extends javax.swing.JFrame {
 
@@ -239,13 +249,17 @@ public class MainForm extends javax.swing.JFrame {
         Point point = new Point(0, 0);
         Cursor cursor = toolkit.createCustomCursor(img, point, "Cursor");
 
+
+        graphComponent.setCursor(cursor); // still doesn't work PMC
+
         //jPanel1.setCursor(cursor); // still doesn't work PMC
         //graphComponent.setCursor(cursor);
         this.jScrollPane1.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+
     }
 
 //This method will add a stock to the graph
-    void AddStock(String name, String styleName,
+   void AddStock(String name, String styleName,
             String inputsymbol, String inputinitial, String inputequation, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -256,9 +270,28 @@ public class MainForm extends javax.swing.JFrame {
         Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
 
         graph.getModel().endUpdate();
-        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial);
+        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial,x+"",y+"");
         stockArrayList.add(stockobject);
     }
+
+   // This method will add a stock to the graph from a save file
+    void AddStock(StockObject stock) {
+        //Object parent = graph.getDefaultParent();
+        graphComponent.setConnectable(false);
+        graph.setCellsBendable(false);
+        graph.setCellsCloneable(false);
+        graph.getModel().beginUpdate();
+        //stockObject is created and added to the stockArrayList
+       /* Object node = graph.insertVertex(parent, null, stock.getStockName(), Integer.parseInt(stock.getStockX()), 
+                Integer.parseInt(stock.getStockY()), 100, 50, "Stock");//draw the node
+        */
+        graph.getModel().endUpdate();
+        /*StockObject stockobject = new StockObject(node,stock.getStockName(), stock.getStockDescrip(), 
+                stock.getStockInitial(),stock.getStockX(),stock.getStockY());
+        stockArrayList.add(stockobject);*/
+    }
+// This method will add a flow to the graph from the user input
+
 // This method will add a flow to the graph
 
     // get arrow object from mxCell
@@ -313,6 +346,7 @@ public class MainForm extends javax.swing.JFrame {
         return null;
     }
 
+
     void AddFlow(String name, String styleName, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -322,13 +356,27 @@ public class MainForm extends javax.swing.JFrame {
         try {
             //flowObject is added to the flowArrayList
             Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-            FlowObject flowobject = new FlowObject(node, inputname, inputequation);
+            FlowObject flowobject = new FlowObject(node, inputname, inputequation,x+"",y+"");
             flowArrayList.add(flowobject);
+
+            
+
             mxCell flow = (mxCell) node;
             flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
+
         } finally {
             graph.getModel().endUpdate();
         }
+    }
+// This method will add a flow to the graph from a save file
+    void AddFlow(FlowObject flow) {
+        //Object parent = graph.getDefaultParent();
+        graphComponent.setConnectable(false);
+        graph.setCellsBendable(false);
+        graph.setCellsCloneable(false);
+        graph.getModel().beginUpdate();
+            graph.getModel().endUpdate();
+        
     }
 // This method will add a right pointing arrow to the graph
 
@@ -466,11 +514,21 @@ public class MainForm extends javax.swing.JFrame {
         try {
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
             VariableObject variableobject = new VariableObject(node, inputName,
-                    inputSymbol, inputInitial);
+                    inputSymbol, inputInitial,x+"",y+"");
             variableArrayList.add(variableobject);
         } finally {
             graph.getModel().endUpdate();
         }
+    }
+    void AddVariable(VariableObject var) {
+        
+        graphComponent.setConnectable(true);
+        graph.setCellsCloneable(false);
+        graph.setCellsBendable(false);
+        graph.getModel().beginUpdate();
+
+            graph.getModel().endUpdate();
+
     }
 
     /**
@@ -503,6 +561,7 @@ public class MainForm extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         SaveMenuItem = new javax.swing.JMenuItem();
+        OpenMenuItem = new javax.swing.JMenuItem();
         PrintMenuItem = new javax.swing.JMenuItem();
         EditMenu = new javax.swing.JMenu();
         DeleteMenuItem = new javax.swing.JMenuItem();
@@ -675,6 +734,15 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
         FileMenu.add(SaveMenuItem);
+
+        OpenMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        OpenMenuItem.setText("Open");
+        OpenMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                OpenMenuItemActionPerformed(evt);
+            }
+        });
+        FileMenu.add(OpenMenuItem);
 
         PrintMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.CTRL_MASK));
         PrintMenuItem.setText("Print");
@@ -892,11 +960,71 @@ public class MainForm extends javax.swing.JFrame {
     private void SaveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveMenuItemActionPerformed
         // TODO add your handling code here:
         //Brings up file chooser as to where to save objects
+        JSONSave savefile = new JSONSave();
         int returnVal = fc.showSaveDialog(MainForm.this);
-
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fc.getSelectedFile();
-            //This is where a real application would open the file
+            try {  
+              
+            // Writing to a file  
+           JFileChooser chooser=new JFileChooser();
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.showSaveDialog(null);
+
+            String path=chooser.getSelectedFile().getAbsolutePath();
+            String filename=chooser.getSelectedFile().getName();
+            File newSaveFile=new File(path,filename);  
+            newSaveFile.createNewFile(); 
+            FileWriter fileWriter = new FileWriter(newSaveFile);  //temp hardcoded file location
+            
+            fileWriter.write("{ \n"); 
+            fileWriter.write("\"Stocks\" : \n"); 
+            System.out.println("Writing JSON objects to file");  
+            System.out.println("-----------------------"); 
+            JSONArray stockList = new JSONArray();
+            for (int i = 0; i < stockArrayList.size(); i++) {
+                JSONObject stockObj = savefile.saveStock(stockArrayList.get(i));
+                stockList.add(stockObj);
+            }        
+            fileWriter.write(stockList.toJSONString()+", \n"); 
+            fileWriter.write("\n");
+            fileWriter.write("\"Flows\" : \n"); 
+            fileWriter.flush();
+            JSONArray flowList = new JSONArray();
+            for (int i = 0; i < flowArrayList.size(); i++)
+            {
+               JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
+               flowList.add(flowObj);
+            }
+            
+            fileWriter.write(flowList.toJSONString()+", \n"); 
+            fileWriter.write("\n"); 
+            fileWriter.write("\"Variables\" : \n"); 
+            fileWriter.flush();
+            JSONArray varList = new JSONArray();
+            for (int i = 0; i < variableArrayList.size(); i++)
+            {
+               JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
+               varList.add(varObj);
+            }
+            fileWriter.write(varList.toJSONString()+"\n");  
+            fileWriter.flush();
+            for (int i = 0; i < arrowArrayList.size(); i++)
+            {
+               
+                
+            }   
+            fileWriter.write("\n"); 
+            fileWriter.write("\"Model Settings\" : \n"); 
+            JSONObject settings = savefile.saveSettings(modelSettings);
+            fileWriter.write(settings.toJSONString()+", \n");  
+            fileWriter.write("}");   
+            fileWriter.close();
+            System.out.println("Finished writing file");
+  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }
+            
         }
     }//GEN-LAST:event_SaveMenuItemActionPerformed
 
@@ -911,9 +1039,7 @@ public class MainForm extends javax.swing.JFrame {
     private void runSimBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSimBtnActionPerformed
 
         Methods method2 = new Methods();
-
-        //this is an attempt at fixing the bug of data not resetting. Yet it still doesn't reset
-        //method2.ResetData(data);
+        
         for (int i = 0; i < stockArrayList.size(); i++) {
             String s = stockArrayList.get(i).getObjName();
             final JTextField stockName = new JTextField(s);
@@ -926,6 +1052,9 @@ public class MainForm extends javax.swing.JFrame {
             stockArrayList.get(cnt).setStockArg(stockSymbol.getText(), stockInitial.getText());
         }
         //one improvement is to make things like Double.parseDouble(modelSettings.getFinalTime() static variables
+       /* Object node = graph.createVertex(null, null, "t", 0, 0, 100, 50, "Time");
+        VariableObject time = new VariableObject(node,"t","t",modelSettings.getInitialTime(),"0","0");
+        variableArrayList.add(time);*/
         method2 = new Methods((ArrayList) stockArrayList, flowArrayList, variableArrayList,
                 Double.parseDouble(modelSettings.getInitialTime()),
                 Double.parseDouble(modelSettings.getFinalTime()), Double.parseDouble(modelSettings.getTimeStep()),
@@ -1161,7 +1290,10 @@ public class MainForm extends javax.swing.JFrame {
         stockBtnActionPerformed(evt);
 
     }//GEN-LAST:event_StockMenuItemActionPerformed
-
+    public static mxGraph getGraph(){
+        return graph;
+    } 
+    
     private void DeleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteMenuItemActionPerformed
         // TODO add your handling code here:
         deleteBtnActionPerformed(evt);
@@ -1407,7 +1539,7 @@ public class MainForm extends javax.swing.JFrame {
             flow.setName(s);
             //pre filling fields. stockname is s because its the same as the panel name
             final JTextField flowName = new JTextField(s);
-            final JTextField flowEquation = new JTextField(flowArrayList.get(i).getflowEquation());
+            final JTextField flowEquation = new JTextField(flowArrayList.get(i).getFlowEquation());
             flow.setLayout(new BoxLayout(flow, BoxLayout.PAGE_AXIS));
             flow.add(new JLabel(" "));
             flow.add(new JLabel("Flow options for " + flowArrayList.get(i).getObjName()));
@@ -1633,6 +1765,42 @@ public class MainForm extends javax.swing.JFrame {
         objectLoc = 10;
     }//GEN-LAST:event_arrowDMenuItemActionPerformed
 
+    private void OpenMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenMenuItemActionPerformed
+        // TODO add your handling code here:
+        //JSONParser parser = new JSONParser();
+        
+        JSONParser parser = new JSONParser();
+        JFileChooser fc = new JFileChooser();
+        int returnVal = fc.showOpenDialog(null);
+        //String srcName = "";
+        if (returnVal != JFileChooser.APPROVE_OPTION)
+            return;
+        
+        File srcFile = fc.getSelectedFile();
+        //String filename = "srcFile";
+        graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
+        
+        stockArrayList = JSONRead.readStock(parser, srcFile);
+        for(int i=0;i<stockArrayList.size();i++)
+        {
+            AddStock(stockArrayList.get(i));
+        }
+        flowArrayList = JSONRead.readFlow(parser, srcFile);
+        for(int i=0;i<flowArrayList.size();i++)
+        {
+            AddFlow(flowArrayList.get(i));
+        }
+        variableArrayList = JSONRead.readVar(parser, srcFile);
+        for(int i=0;i<variableArrayList.size();i++)
+        {
+            AddVariable(variableArrayList.get(i));
+        }
+        String[] mSettings = JSONRead.readSettings(parser, srcFile);
+        modelSettings.initialTime=mSettings[0];
+        modelSettings.finalTime=mSettings[1];
+        modelSettings.timeStep=mSettings[2];
+    }//GEN-LAST:event_OpenMenuItemActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1677,6 +1845,7 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JMenu FileMenu;
     private javax.swing.JMenuItem FlowMenuItem;
     private javax.swing.JMenu HelpMenu;
+    private javax.swing.JMenuItem OpenMenuItem;
     private javax.swing.JMenuItem PrintMenuItem;
     private javax.swing.JMenuItem SaveMenuItem;
     private javax.swing.JMenuItem StockMenuItem;

@@ -56,7 +56,6 @@ public class SuperObject {
     //returns the stock object of jgraph object type
 
     public Object getO_Object() {
-
         return oObj;
     }
 

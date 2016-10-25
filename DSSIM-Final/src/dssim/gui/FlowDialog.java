@@ -43,7 +43,7 @@ public class FlowDialog extends javax.swing.JDialog {
 
     public void updateComponents() {
         jTextFieldFlowName.setText(foFlow.getObjName());
-        jTextFieldFlowEquat1.setText(foFlow.getflowEquation());
+        jTextFieldFlowEquat1.setText(foFlow.getFlowEquation());
         jTextFieldFlowVariables2.setText("variables here");
 
     }
@@ -158,7 +158,7 @@ public class FlowDialog extends javax.swing.JDialog {
         if(!jTextFieldFlowName.getText().equals(foFlow.getObjName())){
             foFlow.setObjName(jTextFieldFlowName.getText());
         }
-        if(!jTextFieldFlowEquat1.getText().equals(foFlow.getflowEquation())){
+        if(!jTextFieldFlowEquat1.getText().equals(foFlow.getFlowEquation())){
             foFlow.setFlowEquation(jTextFieldFlowEquat1.getText());
         }
         dispose();

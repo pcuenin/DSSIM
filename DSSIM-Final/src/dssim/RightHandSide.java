@@ -52,7 +52,7 @@ public class RightHandSide {
                 FlowObject flow = flowArrayList.get(j);
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
-                e = new Expression(flow.getflowEquation(), globalvariables);
+                e = new Expression(flow.getFlowEquation(), globalvariables);
                 
                 ret[i] = e.calculate();
 
