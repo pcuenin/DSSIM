@@ -57,17 +57,17 @@ import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
 
 import java.io.FileWriter;
-import java.io.FileReader;
 import java.io.IOException;
 import org.json.simple.parser.JSONParser;
 
-
 import dssim.gui.ArrowDialog;
+import dssim.gui.ConnectableModelObject;
 import dssim.gui.FlowDialog;
+import dssim.gui.ModelingObject;
 import dssim.gui.StockDialog;
 import dssim.gui.VariableDialog;
 import java.util.Map;
-
+import java.util.Vector;
 
 public class MainForm extends javax.swing.JFrame {
 
@@ -88,10 +88,19 @@ public class MainForm extends javax.swing.JFrame {
     ModelSettings modelSettings = new ModelSettings();
 
     String inputname;
-    String inputsymbol;
+    String inputdescrip;
     String inputinitial;
     String inputequation;
     String inputValue;
+    static final String STOCK_STYLE = "Stock";
+    static final String VARIABLE_STYLE = "Variable";
+    static final String ARROW_STYLE = "Arrow";
+    static final String FLOW_STYLE = "Flow";
+
+    MouseEvent last = null;
+    boolean isFirstClickArrow = true;
+    boolean isFirstClickFlow = true;
+    
 
     /*these ArrayLists are for keeping track of the graph objects placed by the user. 
      another method could be to keep track
@@ -101,9 +110,7 @@ public class MainForm extends javax.swing.JFrame {
     public ArrayList<VariableObject> variableArrayList = new ArrayList<VariableObject>();
     public ArrayList<ArrowObject> arrowArrayList = new ArrayList<ArrowObject>();
 
-    /**
-     * Creates new form MainForm
-     */
+    //Creates new form MainForm
     public MainForm() {
 
         initComponents();
@@ -141,8 +148,8 @@ public class MainForm extends javax.swing.JFrame {
             public void mousePressed(MouseEvent e) {
                 cell = graphComponent.getCellAt(e.getX(), e.getY());
 
-                if (e.getClickCount() >= 2) { 
-                    
+                if (e.getClickCount() >= 2) {
+
                     // if the item is double clicked PMC 100716
                     //figure out what type of object they double clicked
                     // args back when you figure that out
@@ -151,95 +158,114 @@ public class MainForm extends javax.swing.JFrame {
                     mxCell mxobj = (mxCell) obj;// cast generic object to be a mxCell
                     String objst = (String) mxobj.getStyle(); // mull the mxCell id to use
 
-                    if (objst.equals("Stock")) {
+                    if (objst.equals(MainForm.STOCK_STYLE)) {
                         //do stock dialog
                         StockObject so = getStock(mxobj);
                         StockDialog dialog = new StockDialog(new javax.swing.JFrame(), true, so, variableArrayList);
                         dialog.setVisible(true);
-                        
-                    } else if (objst.equals("Flow")) {
+
+                    } else if (objst.equals(MainForm.FLOW_STYLE)) {
                         // do Flow dialog
                         FlowObject fo = getFlow(mxobj);
-                        FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, fo);
+                        FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, fo, variableArrayList);
                         dialog.setVisible(true);
-                        
-                    } else if (objst.equals("Arrow")) {  // not flow not stock must be arrow
+
+                    } else if (objst.equals(MainForm.ARROW_STYLE)) {  // not flow not stock must be arrow
                         ArrowObject ao = getArrow(mxobj); // find the arrow object from the mxcell
                         ArrowDialog dialog = new ArrowDialog(new javax.swing.JFrame(), true, ao);
                         dialog.setVisible(true);
-                        
 
-                        //ArrowDialog.main(ao); // pass the arrow object to the the arrow dialog
+                        //ArrowDialog.main(ao); // pass the arrow object to the the arrow dialogva
                     } else {
                         // do variable dialog
                         VariableObject vo = getVar(mxobj); // find the arrow object from the mxcell
-                        VariableDialog dialog = new VariableDialog(new javax.swing.JFrame(), true, vo);
+                        VariableDialog dialog = new VariableDialog(new javax.swing.JFrame(), true, vo, variableArrayList);
                         dialog.setVisible(true);
 
                     }
                     // for look through each stock/flow/arrow array to find the object 
-                    //
                     // then call the form based on the result
-
-                     // use graph to access info about vertex
+                    // use graph to access info about vertex
                     //how are the objects stored... need visual
                 }
 
                 // different objectLoc will call different Add functions
-                if (objectLoc == 1) {
-                    
-                    AddStock(inputname, style, inputsymbol, inputinitial, inputequation, e.getX(), e.getY());
+                if (objectLoc == 1) { // stock loc
+
+                    AddStock(inputname, style, inputdescrip, inputinitial, inputequation, e.getX(), e.getY());
                     objectLoc = -1;
-                } else if (objectLoc == 2) {
-                    AddFlow(inputname, style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 3) {
-                    AddArrowRight(style, e.getX(), e.getY());
-                    objectLoc = -1;
+                } else if (objectLoc == 2) { // Flow lock
+                    if (isFirstClickFlow) {
+                        last = e;
+                        if (graphComponent.getCellAt(e.getX(), e.getY()) == null) { //create flow pool if null
+                            AddFlowPool(e.getX(), e.getY());
+                            
+                        }
+                        //System.out.print("Stored first click");
+                        isFirstClickFlow = false;
+                    } else {
+                        if (graphComponent.getCellAt(e.getX(), e.getY()) == null) { //create flow pool if null
+                            AddFlowPool(e.getX(), e.getY());
+                        }
+
+                        Object from = graphComponent.getCellAt(last.getX(), last.getY());
+                        Object to = graphComponent.getCellAt(e.getX(), e.getY());
+                        //System.out.print("Stored second click");
+                        AddFlowEdge(inputname, style, from, to);
+
+                        isFirstClickFlow = true;
+                        objectLoc = -1;
+                    }
+
+                } else if (objectLoc == 3) { //store first object arrow object
+                    if (isFirstClickArrow) {
+                        last = e;
+                        //System.out.print("Stored first click");
+                        isFirstClickArrow = false;
+                    } else {
+                        Object from = graphComponent.getCellAt(last.getX(), last.getY());
+                        Object to = graphComponent.getCellAt(e.getX(), e.getY());
+
+                        AddArrowEdge(style, from, to);
+                        /*
+                         Object parent = graph.getDefaultParent();
+
+                         graph.getModel().beginUpdate();
+                         graph.insertEdge(parent, null, "Edge", from, to);
+                         graph.getModel().endUpdate();
+                         //AddArrowUpLft(style, e.getX(), e.getY());*/
+                        isFirstClickArrow = true;
+                        objectLoc = -1;
+
+                    }
                 } else if (objectLoc == 4) {
-                    AddVariable(style, inputname, inputsymbol, inputValue, e.getX(), e.getY());
+                    AddVariable(style, inputname, inputdescrip, inputValue, e.getX(), e.getY());
                     objectLoc = -1;
                 } else if (objectLoc == 5) {
-                    AddArrowUpLft(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 6) {
-                    AddArrowUpRght(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 7) {
-                    AddArrowLwLft(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 8) {
-                    AddArrowLwRght(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 9) {
-                    AddArrowUp(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 10) {
-                    AddArrowDwn(style, e.getX(), e.getY());
-                    objectLoc = -1;
-                } else if (objectLoc == 11) {
-                    AddArrowLft(style, e.getX(), e.getY());
-                    objectLoc = -1;
+
+                    //AddArrowRight(style, e.getX(), e.getY(), null, null); // update to add to and from object
+                    objectLoc = 5;
+
                 } else {
                     //objectLoc should always be equal to -1 when not placing an object
                     objectLoc = -1;
                 }
             }
 
-        });
+        }
+        );
 
         //This initalizes the stylesheets from stylelist.java class for each object
-        graph.getStylesheet().putCellStyle("Stock", stylelist.getStock());
-        graph.getStylesheet().putCellStyle("Flow", stylelist.getFlow());
-        graph.getStylesheet().putCellStyle("Arrow", stylelist.getArrow());
-        graph.getStylesheet().putCellStyle("ArrowLU", stylelist.getArrowLU());
-        graph.getStylesheet().putCellStyle("ArrowRU", stylelist.getArrowRU());
-        graph.getStylesheet().putCellStyle("ArrowLL", stylelist.getArrowLL());
-        graph.getStylesheet().putCellStyle("ArrowRL", stylelist.getArrowRL());
-        graph.getStylesheet().putCellStyle("ArrowU", stylelist.getArrowU());
-        graph.getStylesheet().putCellStyle("ArrowD", stylelist.getArrowD());
-        graph.getStylesheet().putCellStyle("ArrowL", stylelist.getArrowL());
-        graph.getStylesheet().putCellStyle("Variable", stylelist.getVariable());
+        graph.getStylesheet()
+                .putCellStyle("Stock", stylelist.getStock());
+        graph.getStylesheet()
+                .putCellStyle("Flow", stylelist.getFlow());
+        graph.getStylesheet()
+                .putCellStyle("Arrow", stylelist.getArrow());
+        graph.getStylesheet()
+                .putCellStyle("Variable", stylelist.getVariable());
+        graph.getStylesheet()
+                .putCellStyle("FlowPool", stylelist.getFlowPool());
     }
 
     // paul added this PMC 9-27-16
@@ -248,7 +274,6 @@ public class MainForm extends javax.swing.JFrame {
         Image img = toolkit.getImage("lilcombo.png");
         Point point = new Point(0, 0);
         Cursor cursor = toolkit.createCustomCursor(img, point, "Cursor");
-
 
         graphComponent.setCursor(cursor); // still doesn't work PMC
 
@@ -259,7 +284,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
 //This method will add a stock to the graph
-   void AddStock(String name, String styleName,
+    void AddStock(String name, String styleName,
             String inputsymbol, String inputinitial, String inputequation, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -270,11 +295,11 @@ public class MainForm extends javax.swing.JFrame {
         Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
 
         graph.getModel().endUpdate();
-        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial,x+"",y+"");
+        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial, x + "", y + "");
         stockArrayList.add(stockobject);
     }
 
-   // This method will add a stock to the graph from a save file
+    // This method will add a stock to the graph from a save file
     void AddStock(StockObject stock) {
         //Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -283,17 +308,16 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().beginUpdate();
         //stockObject is created and added to the stockArrayList
        /* Object node = graph.insertVertex(parent, null, stock.getStockName(), Integer.parseInt(stock.getStockX()), 
-                Integer.parseInt(stock.getStockY()), 100, 50, "Stock");//draw the node
-        */
+         Integer.parseInt(stock.getStockY()), 100, 50, "Stock");//draw the node
+         */
         graph.getModel().endUpdate();
         /*StockObject stockobject = new StockObject(node,stock.getStockName(), stock.getStockDescrip(), 
-                stock.getStockInitial(),stock.getStockX(),stock.getStockY());
-        stockArrayList.add(stockobject);*/
+         stock.getStockInitial(),stock.getStockX(),stock.getStockY());
+         stockArrayList.add(stockobject);*/
     }
 // This method will add a flow to the graph from the user input
 
 // This method will add a flow to the graph
-
     // get arrow object from mxCell
     ArrowObject getArrow(mxCell mxc) {
         ArrowObject ao;
@@ -306,8 +330,8 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
-     // get stock object from mxCell
+
+    // get stock object from mxCell
     StockObject getStock(mxCell mxc) {
         StockObject so;
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -319,7 +343,7 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
+
     // get stock flow from mxCell
     FlowObject getFlow(mxCell mxc) {
         FlowObject fo;
@@ -332,7 +356,7 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
+
     // get variable from mxCell
     VariableObject getVar(mxCell mxc) {
         VariableObject vo;
@@ -346,163 +370,125 @@ public class MainForm extends javax.swing.JFrame {
         return null;
     }
 
-
-    void AddFlow(String name, String styleName, int x, int y) {
+    void AddFlowPool(int x, int y) {
         Object parent = graph.getDefaultParent();
+        graphComponent.setConnectable(true);
+        graph.setCellsCloneable(false);
+        graph.setCellsBendable(false);
+        String inputName = "flowpool";
+        String styleName = "FlowPool";
+
+        graph.getModel().beginUpdate();
+        try {
+            Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
+            ConnectableModelObject cmo= new ConnectableModelObject(inputName, node); // need to do something with this
+            //FlowPoolObject flowpoolobject = new FlowPoolObject(node, inputName, x + "", y + "");
+            //FlowPoolArrayList.add(flowpoolobject);
+            /*VariableObject variableobject = new VariableObject(node, inputName,
+             inputSymbol, inputInitial, x + "", y + "");
+             variableArrayList.add(variableobject);*/
+        } finally {
+            graph.getModel().endUpdate();
+        }
+
+    }
+
+    void AddFlowEdge(String name, String styleName, Object src, Object to) {
+        Object parent = graph.getDefaultParent(); // good
         graphComponent.setConnectable(false);
         graph.setCellsBendable(false);
         graph.setCellsCloneable(false);
-        graph.getModel().beginUpdate();
-        try {
-            //flowObject is added to the flowArrayList
-            Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-            FlowObject flowobject = new FlowObject(node, inputname, inputequation,x+"",y+"");
-            flowArrayList.add(flowobject);
 
+        graph.getModel().beginUpdate();
+
+        try {
+
+            Object node = graph.insertEdge(parent, null, null, src, to, styleName);
+            ModelingObject moSrc = this.getModelObject(src);
+            ModelingObject moTo = this.getModelObject(to);
+            if (moSrc == null & moTo == null) {
+                JOptionPane.showConfirmDialog(this, "Flow requires at least a source or target");
+            } else {
+                //Object node = graph.insertE(parent, null, null, x, y, 100, 50, styleName);//draw the node
+                FlowObject flowobject = new FlowObject(node, name, inputequation, (ConnectableModelObject) moSrc, (ConnectableModelObject) moTo);
+                flowArrayList.add(flowobject);
+            }
+
+        } finally {
+            graph.getModel().endUpdate();
+        }
+
+        /*
+         try {
+         //flowObject is added to the flowArrayList
+         Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
+         FlowObject flowobject = new FlowObject(node, inputname, inputequation, x + "", y + "");
+         flowArrayList.add(flowobject);
             
 
-            mxCell flow = (mxCell) node;
-            flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
+         mxCell flow = (mxCell) node;
+         flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
 
-        } finally {
-            graph.getModel().endUpdate();
-        }
+         } finally {
+         graph.getModel().endUpdate();
+         }*/
     }
 // This method will add a flow to the graph from a save file
-    void AddFlow(FlowObject flow) {
-        //Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsBendable(false);
-        graph.setCellsCloneable(false);
-        graph.getModel().beginUpdate();
-            graph.getModel().endUpdate();
-        
-    }
+
+    /*void AddFlow(FlowObject flow) {
+     //Object parent = graph.getDefaultParent();
+     graphComponent.setConnectable(false);
+     graph.setCellsBendable(false);
+     graph.setCellsCloneable(false);
+     graph.getModel().beginUpdate();
+     graph.getModel().endUpdate();
+
+     }*/
 // This method will add a right pointing arrow to the graph
+    ModelingObject getModelObject(Object obj) {
+        // find which object it in the list
 
-    void AddArrowRight(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
+        Map<String, Object> objMap = graph.getCellStyle(obj); //
+        mxCell mxobj = (mxCell) obj;// cast generic object to be a mxCell
+        String objst = (String) mxobj.getStyle(); // mull the mxCell id to use
+        if (objst.equals(MainForm.FLOW_STYLE)) {
+            return this.getFlow(mxobj);
+
+        } else if (objst.equals(VARIABLE_STYLE)) {
+            return this.getVar(mxobj);
+        } else if (objst.equals(MainForm.STOCK_STYLE)) {
+            return this.getStock(mxobj);
+        }
+        return null;
+
+    }
+
+    void AddArrowEdge(String styleName, Object src, Object to) {
+        Object parent = graph.getDefaultParent(); // get object parent
         graphComponent.setConnectable(false);
         graph.setCellsCloneable(false);
         graph.setCellsBendable(false);
 
         graph.getModel().beginUpdate();
         try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-            ArrowObject arrowobject = new ArrowObject("arrow",node);
-            this.arrowArrayList.add(arrowobject);
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
-//This method will add a upper left pointing arrow
 
-    void AddArrowUpLft(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
+            Object node = graph.insertEdge(parent, null, null, src, to, styleName);
+            ModelingObject moSrc = this.getModelObject(src);
+            ModelingObject moTo = this.getModelObject(to);
+            if (moSrc == null || moTo == null) {
+                JOptionPane.showConfirmDialog(this, "Arrow requires both source and target");
+            } else {
+                //Object node = graph.insertE(parent, null, null, x, y, 100, 50, styleName);//draw the node
+                ArrowObject arrowobject = new ArrowObject("arrow", node, (ConnectableModelObject) moSrc, (ConnectableModelObject) moTo);
+                this.arrowArrayList.add(arrowobject);
+            }
 
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
         } finally {
             graph.getModel().endUpdate();
         }
     }
 
-//This method will add an upper right pointing arrow
-    void AddArrowUpRght(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
-//This method will add a lower left pointing arrow
-
-    void AddArrowLwLft(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
-//This method will add a lower right pointing arrow
-
-    void AddArrowLwRght(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
-//This method will add an up pointing arrow
-
-    void AddArrowUp(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
-//This method will add a down pointing arrow
-
-    void AddArrowDwn(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-
-        }
-    }
-//This method will add a left pointing arrow
-
-    void AddArrowLft(String styleName, int x, int y) {
-        Object parent = graph.getDefaultParent();
-        graphComponent.setConnectable(false);
-        graph.setCellsCloneable(false);
-        graph.setCellsBendable(false);
-
-        graph.getModel().beginUpdate();
-        try {
-            Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-        } finally {
-            graph.getModel().endUpdate();
-        }
-    }
 // This method will add a variable to the graph
-
     void AddVariable(String styleName, String inputName,
             String inputSymbol, String inputInitial, int x, int y) {
         Object parent = graph.getDefaultParent();
@@ -514,20 +500,21 @@ public class MainForm extends javax.swing.JFrame {
         try {
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
             VariableObject variableobject = new VariableObject(node, inputName,
-                    inputSymbol, inputInitial,x+"",y+"");
+                    inputSymbol, inputInitial, x + "", y + "");
             variableArrayList.add(variableobject);
         } finally {
             graph.getModel().endUpdate();
         }
     }
+
     void AddVariable(VariableObject var) {
-        
+
         graphComponent.setConnectable(true);
         graph.setCellsCloneable(false);
         graph.setCellsBendable(false);
         graph.getModel().beginUpdate();
 
-            graph.getModel().endUpdate();
+        graph.getModel().endUpdate();
 
     }
 
@@ -547,7 +534,6 @@ public class MainForm extends javax.swing.JFrame {
         jSeparator4 = new javax.swing.JSeparator();
         stockBtn = new javax.swing.JButton();
         flowBtn = new javax.swing.JButton();
-        arrowComboBox = new javax.swing.JComboBox<String>();
         variableBtn = new javax.swing.JButton();
         deleteBtn = new javax.swing.JToggleButton();
         modelSettingsBtn = new javax.swing.JButton();
@@ -558,6 +544,7 @@ public class MainForm extends javax.swing.JFrame {
         methodChoiceCombo = new javax.swing.JComboBox();
         showAllVariableBtn = new javax.swing.JButton();
         closeBtn = new javax.swing.JButton();
+        Arrowbtn = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         FileMenu = new javax.swing.JMenu();
         SaveMenuItem = new javax.swing.JMenuItem();
@@ -570,13 +557,6 @@ public class MainForm extends javax.swing.JFrame {
         FlowMenuItem = new javax.swing.JMenuItem();
         arrowTypes = new javax.swing.JMenu();
         arrowRMenuItem = new javax.swing.JMenuItem();
-        arrowLMenuItem = new javax.swing.JMenuItem();
-        arrowRUMenuItem = new javax.swing.JMenuItem();
-        arrowLUMenuItem = new javax.swing.JMenuItem();
-        arrowRLMenuItem = new javax.swing.JMenuItem();
-        arrowLLMenuItem = new javax.swing.JMenuItem();
-        arrowUMenuItem = new javax.swing.JMenuItem();
-        arrowDMenuItem = new javax.swing.JMenuItem();
         VariableMenuItem = new javax.swing.JMenuItem();
         HelpMenu = new javax.swing.JMenu();
         AboutMenuItem = new javax.swing.JMenuItem();
@@ -634,13 +614,6 @@ public class MainForm extends javax.swing.JFrame {
         flowBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 flowBtnActionPerformed(evt);
-            }
-        });
-
-        arrowComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Right Arrow", "Upper Left Arrow", "Upper Right Arrow", "Lower Left Arrow", "Lower Right Arrow", "Up Arrow", "Down Arrow", "Left Arrow" }));
-        arrowComboBox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowComboBoxActionPerformed(evt);
             }
         });
 
@@ -724,6 +697,15 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        Arrowbtn.setText("Arrow");
+        Arrowbtn.setToolTipText("");
+        Arrowbtn.setActionCommand("Arrowbtn");
+        Arrowbtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ArrowbtnActionPerformed(evt);
+            }
+        });
+
         FileMenu.setText("File");
 
         SaveMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
@@ -798,62 +780,6 @@ public class MainForm extends javax.swing.JFrame {
         });
         arrowTypes.add(arrowRMenuItem);
 
-        arrowLMenuItem.setText("Left Arrow");
-        arrowLMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowLMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowLMenuItem);
-
-        arrowRUMenuItem.setText("Upper Right Arrow");
-        arrowRUMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowRUMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowRUMenuItem);
-
-        arrowLUMenuItem.setText("Upper Left Arrow");
-        arrowLUMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowLUMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowLUMenuItem);
-
-        arrowRLMenuItem.setText("Lower Right Arrow");
-        arrowRLMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowRLMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowRLMenuItem);
-
-        arrowLLMenuItem.setText("Lower Left Arrow");
-        arrowLLMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowLLMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowLLMenuItem);
-
-        arrowUMenuItem.setText("Up Arrow");
-        arrowUMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowUMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowUMenuItem);
-
-        arrowDMenuItem.setText("Down Arrow");
-        arrowDMenuItem.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                arrowDMenuItemActionPerformed(evt);
-            }
-        });
-        arrowTypes.add(arrowDMenuItem);
-
         AddMenu.add(arrowTypes);
 
         VariableMenuItem.setText("Variable");
@@ -890,13 +816,13 @@ public class MainForm extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(stockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(flowBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(arrowComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(Arrowbtn)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(variableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -909,7 +835,7 @@ public class MainForm extends javax.swing.JFrame {
                         .addComponent(viewGraphButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(viewTableButton, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(analysisMethodLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(methodChoiceCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -917,7 +843,7 @@ public class MainForm extends javax.swing.JFrame {
                         .addComponent(showAllVariableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1131, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -930,9 +856,9 @@ public class MainForm extends javax.swing.JFrame {
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(stockBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(flowBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(arrowComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(variableBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(Arrowbtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(closeBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(runSimBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -963,68 +889,64 @@ public class MainForm extends javax.swing.JFrame {
         JSONSave savefile = new JSONSave();
         int returnVal = fc.showSaveDialog(MainForm.this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {  
-              
-            // Writing to a file  
-           JFileChooser chooser=new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.showSaveDialog(null);
+            try {
 
-            String path=chooser.getSelectedFile().getAbsolutePath();
-            String filename=chooser.getSelectedFile().getName();
-            File newSaveFile=new File(path,filename);  
-            newSaveFile.createNewFile(); 
-            FileWriter fileWriter = new FileWriter(newSaveFile);  //temp hardcoded file location
-            
-            fileWriter.write("{ \n"); 
-            fileWriter.write("\"Stocks\" : \n"); 
-            System.out.println("Writing JSON objects to file");  
-            System.out.println("-----------------------"); 
-            JSONArray stockList = new JSONArray();
-            for (int i = 0; i < stockArrayList.size(); i++) {
-                JSONObject stockObj = savefile.saveStock(stockArrayList.get(i));
-                stockList.add(stockObj);
-            }        
-            fileWriter.write(stockList.toJSONString()+", \n"); 
-            fileWriter.write("\n");
-            fileWriter.write("\"Flows\" : \n"); 
-            fileWriter.flush();
-            JSONArray flowList = new JSONArray();
-            for (int i = 0; i < flowArrayList.size(); i++)
-            {
-               JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
-               flowList.add(flowObj);
+                // Writing to a file  
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                chooser.showSaveDialog(null);
+
+                String path = chooser.getSelectedFile().getAbsolutePath();
+                String filename = chooser.getSelectedFile().getName();
+                File newSaveFile = new File(path, filename);
+                newSaveFile.createNewFile();
+                FileWriter fileWriter = new FileWriter(newSaveFile);  //temp hardcoded file location
+
+                fileWriter.write("{ \n");
+                fileWriter.write("\"Stocks\" : \n");
+                System.out.println("Writing JSON objects to file");
+                System.out.println("-----------------------");
+                JSONArray stockList = new JSONArray();
+                for (int i = 0; i < stockArrayList.size(); i++) {
+                    JSONObject stockObj = savefile.saveStock(stockArrayList.get(i));
+                    stockList.add(stockObj);
+                }
+                fileWriter.write(stockList.toJSONString() + ", \n");
+                fileWriter.write("\n");
+                fileWriter.write("\"Flows\" : \n");
+                fileWriter.flush();
+                JSONArray flowList = new JSONArray();
+                for (int i = 0; i < flowArrayList.size(); i++) {
+                    JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
+                    flowList.add(flowObj);
+                }
+
+                fileWriter.write(flowList.toJSONString() + ", \n");
+                fileWriter.write("\n");
+                fileWriter.write("\"Variables\" : \n");
+                fileWriter.flush();
+                JSONArray varList = new JSONArray();
+                for (int i = 0; i < variableArrayList.size(); i++) {
+                    JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
+                    varList.add(varObj);
+                }
+                fileWriter.write(varList.toJSONString() + "\n");
+                fileWriter.flush();
+                for (int i = 0; i < arrowArrayList.size(); i++) {
+
+                }
+                fileWriter.write("\n");
+                fileWriter.write("\"Model Settings\" : \n");
+                JSONObject settings = savefile.saveSettings(modelSettings);
+                fileWriter.write(settings.toJSONString() + ", \n");
+                fileWriter.write("}");
+                fileWriter.close();
+                System.out.println("Finished writing file");
+
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            
-            fileWriter.write(flowList.toJSONString()+", \n"); 
-            fileWriter.write("\n"); 
-            fileWriter.write("\"Variables\" : \n"); 
-            fileWriter.flush();
-            JSONArray varList = new JSONArray();
-            for (int i = 0; i < variableArrayList.size(); i++)
-            {
-               JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
-               varList.add(varObj);
-            }
-            fileWriter.write(varList.toJSONString()+"\n");  
-            fileWriter.flush();
-            for (int i = 0; i < arrowArrayList.size(); i++)
-            {
-               
-                
-            }   
-            fileWriter.write("\n"); 
-            fileWriter.write("\"Model Settings\" : \n"); 
-            JSONObject settings = savefile.saveSettings(modelSettings);
-            fileWriter.write(settings.toJSONString()+", \n");  
-            fileWriter.write("}");   
-            fileWriter.close();
-            System.out.println("Finished writing file");
-  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }
-            
+
         }
     }//GEN-LAST:event_SaveMenuItemActionPerformed
 
@@ -1039,7 +961,7 @@ public class MainForm extends javax.swing.JFrame {
     private void runSimBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSimBtnActionPerformed
 
         Methods method2 = new Methods();
-        
+
         for (int i = 0; i < stockArrayList.size(); i++) {
             String s = stockArrayList.get(i).getObjName();
             final JTextField stockName = new JTextField(s);
@@ -1053,8 +975,8 @@ public class MainForm extends javax.swing.JFrame {
         }
         //one improvement is to make things like Double.parseDouble(modelSettings.getFinalTime() static variables
        /* Object node = graph.createVertex(null, null, "t", 0, 0, 100, 50, "Time");
-        VariableObject time = new VariableObject(node,"t","t",modelSettings.getInitialTime(),"0","0");
-        variableArrayList.add(time);*/
+         VariableObject time = new VariableObject(node,"t","t",modelSettings.getInitialTime(),"0","0");
+         variableArrayList.add(time);*/
         method2 = new Methods((ArrayList) stockArrayList, flowArrayList, variableArrayList,
                 Double.parseDouble(modelSettings.getInitialTime()),
                 Double.parseDouble(modelSettings.getFinalTime()), Double.parseDouble(modelSettings.getTimeStep()),
@@ -1069,36 +991,131 @@ public class MainForm extends javax.swing.JFrame {
         data = method2.returnData();
     }//GEN-LAST:event_runSimBtnActionPerformed
 
-    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        // TODO add your handling code here:
-        graph.getModel().remove(cell);
-        System.out.println(cell.toString());
-        //each of these forloops is a way for the system to go through each graph object and check if it is the one that
-        //needs to be deleted. The main key references here are the graphobject cell name kept in the arraylist of that object.
+    private ConnectableModelObject getConnectedObject(mxCell cell) {
         for (int i = 0; i < stockArrayList.size(); i++) {
 
-            if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-                stockArrayList.remove(i);
+            if (stockArrayList.get(i).getO_Object().equals(cell)) {
+                //StockObject so = stockArrayList.remove(i);
+                return stockArrayList.get(i);
+                // not sure if this makes sense
+
             }
         }
         for (int i = 0; i < flowArrayList.size(); i++) {
 
-            if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+            if (flowArrayList.get(i).getO_Object().equals(cell)) {
+                return flowArrayList.get(i);
+
+            }
+        }
+        /*for (int i = 0; i < arrowArrayList.size(); i++) {
+
+         if (arrowArrayList.get(i).getO_Object().equals(cell)) {
+         return arrowArrayList.get(i);
+                
+
+         }
+         }*/
+        for (int i = 0; i < variableArrayList.size(); i++) {
+
+            if (variableArrayList.get(i).getO_Object().equals(cell)) {
+                return variableArrayList.get(i);
+            }
+        }
+        return null;
+    }
+
+    private void deleteModelingObject(ModelingObject mo) {
+        for (int i = 0; i < stockArrayList.size(); i++) {
+
+            if (stockArrayList.get(i).equals(mo)) {
+                stockArrayList.remove(i);
+                return;
+                //return stockArrayList.get(i);
+                // not sure if this makes sense
+
+            }
+        }
+        for (int i = 0; i < flowArrayList.size(); i++) {
+
+            if (flowArrayList.get(i).equals(mo)) {
                 flowArrayList.remove(i);
+                return;
+
             }
         }
         for (int i = 0; i < arrowArrayList.size(); i++) {
 
-            if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+            if (arrowArrayList.get(i).equals(mo)) {
                 arrowArrayList.remove(i);
+                return;
+
             }
         }
         for (int i = 0; i < variableArrayList.size(); i++) {
 
-            if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+            if (variableArrayList.get(i).equals(mo)) {
                 variableArrayList.remove(i);
+                return;
             }
         }
+
+    }
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        // TODO add your handling code here:
+
+        System.out.println(cell.toString());
+        ConnectableModelObject cmo = getConnectedObject((mxCell) cell);
+        if (cmo != null) { // if not an arrow object
+            Vector<ModelingObject> vMo = cmo.getConnectedObjects();
+            for (int i = 0; i < vMo.size(); i++) {
+                ModelingObject mo = vMo.get(i);
+                graph.getModel().remove(mo.getO_Object());
+                deleteModelingObject(mo);
+
+            }
+        }
+        graph.getModel().remove(cell);
+        //each of these forloops is a way for the system to go through each graph object and check if it is the one that
+        //needs to be deleted. The main key references here are the graphobject cell name kept in the arraylist of that object.
+        /*for (int i = 0; i < stockArrayList.size(); i++) {
+
+         if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         StockObject so = stockArrayList.remove(i);
+                
+         // not sure if this makes sense
+         Vector<ModelingObject> moIn= so.getInputs();
+         for(int j=0; j< moIn.size();j++){
+         ConnectableModelObject in = (ConnectableModelObject) moIn.get(j);
+         //get cell and delete
+         }
+         Vector<ModelingObject> moOut= so.getOutputs();
+                
+                
+         }
+         }
+         for (int i = 0; i < flowArrayList.size(); i++) {
+
+         if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         FlowObject fo = flowArrayList.remove(i);
+         fo.removeFlow();
+         }
+         }
+         for (int i = 0; i < arrowArrayList.size(); i++) {
+
+         if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         ArrowObject ao = arrowArrayList.remove(i);
+         ao.removeArrow();
+
+         }
+         }
+         for (int i = 0; i < variableArrayList.size(); i++) {
+
+         if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
+         variableArrayList.remove(i);
+         }
+         }*/
         deleteBtn.setSelected(false);
     }//GEN-LAST:event_deleteBtnActionPerformed
 
@@ -1110,41 +1127,6 @@ public class MainForm extends javax.swing.JFrame {
         style = "Stock";
         //CustomCursor(); need to make work
 
-        /* I commented this out to see if I could move the form later in the flow
-         //check if the user would like to input information
-         JPanel check = new JPanel(); //create box
-         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS)); // center the box
-         check.add(new JLabel("Would you like to input information for this stock?")); // ask them question
-         int yN = JOptionPane.showConfirmDialog(null, check);
-         if (yN == 0) {
-         //if yes, get info
-         //Base values in case someone hits enter to fast, so it wont throw errors
-         JTextField stockName = new JTextField("Stock" + stockArrayList.size());
-         JTextField stockInitial = new JTextField(Double.toString(0.0));
-         JTextField stockDescrip = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
-         JPanel addStock = new JPanel();
-         addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
-         addStock.add(new JLabel("Stock Name"));
-         addStock.add(stockName);
-         addStock.add(new JLabel("Stock Symbol"));
-         addStock.add(stockDescrip);
-         addStock.add(new JLabel("Stock Initial Value"));
-         addStock.add(stockInitial);
-
-         int option = JOptionPane.showConfirmDialog(null, addStock);
-         inputname = stockName.getText();
-         inputsymbol = stockDescrip.getText();
-         inputinitial = stockInitial.getText();
-         } //if no, set blank or default
-         else {
-         //blank values, stock name increments
-         inputname = "Stock" + stockArrayList.size();
-         //these can NOT be "", they show as null and go haywire
-         inputinitial = Double.toString(0.0);
-         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
-         }
-         //updates objectLoc for mouse event on where to place the object on the graph
-         */
         objectLoc = 1;
         stockInfoForm();
 
@@ -1172,12 +1154,12 @@ public class MainForm extends javax.swing.JFrame {
         addStock.add(stockInitial);
 
         int option = JOptionPane.showConfirmDialog(null, addStock, "Add a Stock", JOptionPane.OK_CANCEL_OPTION);
-        if(option==JOptionPane.CANCEL_OPTION){
-            objectLoc =0;
+        if (option == JOptionPane.CANCEL_OPTION) {
+            objectLoc = 0;
             return;
         }
         inputname = stockName.getText();
-        inputsymbol = stockDescrip.getText();
+        inputdescrip = stockDescrip.getText();
         inputinitial = stockInitial.getText();
 
         /*} //if no, set blank or default
@@ -1186,7 +1168,7 @@ public class MainForm extends javax.swing.JFrame {
          inputname = "Stock" + stockArrayList.size();
          //these can NOT be "", they show as null and go haywire
          inputinitial = Double.toString(0.0);
-         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
+         inputdescrip = "Stock" + Integer.toString(stockArrayList.size());
          }*/
         //updates objectLoc for mouse event on where to place the object on the graph
     }
@@ -1217,29 +1199,29 @@ public class MainForm extends javax.swing.JFrame {
         //JPanel check = new JPanel();
         //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
         //check.add(new JLabel("Would you like to input information for this Variable?"));
-        
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField varName = new JTextField("Variable" + variableArrayList.size());
-            JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
-            JTextField varValue = new JTextField("0.0");
-            JPanel addVar = new JPanel();
-            addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
-            addVar.add(new JLabel("Variable Name"));
-            addVar.add(varName);
-            addVar.add(new JLabel("Variable Symbol"));
-            addVar.add(varSymbol);
-            addVar.add(new JLabel("Variable Value"));
-            addVar.add(varValue);
-            int option = JOptionPane.showConfirmDialog(null, addVar,"Add a Variable", JOptionPane.OK_CANCEL_OPTION);
-            if(option==JOptionPane.CANCEL_OPTION){
-            objectLoc =0;
+
+        //if yes, get info
+        //Base values in case someone hits enter to fast, so it wont throw errors
+        JTextField varName = new JTextField("Variable" + variableArrayList.size());
+        JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
+        JTextField varValue = new JTextField("0.0");
+        JPanel addVar = new JPanel();
+        addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
+        addVar.add(new JLabel("Variable Name"));
+        addVar.add(varName);
+        addVar.add(new JLabel("Variable Description"));
+        addVar.add(varSymbol);
+        addVar.add(new JLabel("Variable Equation"));
+        addVar.add(varValue);
+        int option = JOptionPane.showConfirmDialog(null, addVar, "Add a Variable", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.CANCEL_OPTION) {
+            objectLoc = 0;
             return;
         }
-            inputname = varName.getText();
-            inputValue = varValue.getText();
-            inputsymbol = varSymbol.getText();
-        
+        inputname = varName.getText();
+        inputValue = varValue.getText();
+        inputdescrip = varSymbol.getText();
+
     }//GEN-LAST:event_variableBtnActionPerformed
 
     private void closeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeBtnActionPerformed
@@ -1252,81 +1234,19 @@ public class MainForm extends javax.swing.JFrame {
         /*
          // TODO add your handling code here: What is this here? PMC
          //method is the same as the StockBtn above. It is just an extra one in the top menus
-         //increment amount of stocks, used for panels and default names
-         style = "Stock";
-         //check if the user would like to input information
-         JPanel check = new JPanel();
-         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-         check.add(new JLabel("Would you like to input information for this stock?"));
-         int yN = JOptionPane.showConfirmDialog(null, check);
-         if (yN == 0) {
-         //if yes, get info
-         //Base values in case someone hits enter to fast, so it wont throw errors
-         JTextField stockName = new JTextField("Stock" + stockArrayList.size());
-         JTextField stockInitial = new JTextField(Double.toString(0.0));
-         JTextField stockDescrip = new JTextField("Stock" + Integer.toString(stockArrayList.size()));
-         JPanel addStock = new JPanel();
-         addStock.setLayout(new BoxLayout(addStock, BoxLayout.PAGE_AXIS));
-         addStock.add(new JLabel("Stock Name"));
-         addStock.add(stockName);
-         addStock.add(new JLabel("Stock Symbol"));
-         addStock.add(stockDescrip);
-         addStock.add(new JLabel("Stock Initial Value"));
-         addStock.add(stockInitial);
-         int option = JOptionPane.showConfirmDialog(null, addStock);
-         inputname = stockName.getText();
-         inputsymbol = stockDescrip.getText();
-         inputinitial = stockInitial.getText();
-         } //if no, set blank or default
-         else {
-         //blank values, stock name increments
-         inputname = "Stock" + stockArrayList.size();
-         //these can NOT be "", they show as null and go haywire
-         inputinitial = Double.toString(0.0);
-         inputsymbol = "Stock" + Integer.toString(stockArrayList.size());
-         }
-         objectLoc = 1;
-         //old code for posterety */
+         */
         stockBtnActionPerformed(evt);
 
     }//GEN-LAST:event_StockMenuItemActionPerformed
-    public static mxGraph getGraph(){
+    public static mxGraph getGraph() {
         return graph;
-    } 
-    
+    }
+
     private void DeleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteMenuItemActionPerformed
         // TODO add your handling code here:
         deleteBtnActionPerformed(evt);
 
-        //delete method is the same as the delete above. It is just an extra one in the top menus
-        /*graph.getModel().remove(cell);
-         System.out.println(cell.toString());
 
-         for (int i = 0; i < stockArrayList.size(); i++) {
-
-         if (stockArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-         stockArrayList.remove(i);
-         }
-         }
-         for (int i = 0; i < flowArrayList.size(); i++) {
-
-         if (flowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-         flowArrayList.remove(i);
-         }
-         }
-         for (int i = 0; i < arrowArrayList.size(); i++) {
-
-         if (arrowArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-         arrowArrayList.remove(i);
-         }
-         }
-         for (int i = 0; i < variableArrayList.size(); i++) {
-
-         if (variableArrayList.get(i).getObjJgraphName().equals(cell.toString())) {
-         variableArrayList.remove(i);
-         }
-         }
-         deleteBtn.setSelected(false);*/
     }//GEN-LAST:event_DeleteMenuItemActionPerformed
 
 
@@ -1416,27 +1336,27 @@ public class MainForm extends javax.swing.JFrame {
         //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
         //check.add(new JLabel("Would you like to input information for this Flow?"));
         //int yN = JOptionPane.showConfirmDialog(null, check);
-        
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField flowName = new JTextField("Flow" + flowArrayList.size());
-            JTextField flowEquation = new JTextField("");
-            JPanel addFlow = new JPanel();
-            addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
-           
-            addFlow.add(new JLabel("Flow Name"));
-            addFlow.add(flowName);
-            addFlow.add(new JLabel("Flow Equation"));
-            addFlow.add(flowEquation);
-            
-            int option = JOptionPane.showConfirmDialog(null, addFlow,"Add a Flow", JOptionPane.OK_CANCEL_OPTION);
-            if(option==JOptionPane.CANCEL_OPTION){
-            objectLoc =0;
+
+        //if yes, get info
+        //Base values in case someone hits enter to fast, so it wont throw errors
+        JTextField flowName = new JTextField("Flow" + flowArrayList.size());
+        JTextField flowEquation = new JTextField("");
+        JPanel addFlow = new JPanel();
+        addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
+
+        addFlow.add(new JLabel("Flow Name"));
+        addFlow.add(flowName);
+        addFlow.add(new JLabel("Flow Equation"));
+        addFlow.add(flowEquation);
+
+        int option = JOptionPane.showConfirmDialog(null, addFlow, "Add a Flow", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.CANCEL_OPTION) {
+            objectLoc = 0;
             return;
         }
-            inputname = flowName.getText();
-            inputequation = flowEquation.getText();
-        
+        inputname = flowName.getText();
+        inputequation = flowEquation.getText();
+
         objectLoc = 2;
         //AddFlow(response, style);
     }//GEN-LAST:event_flowBtnActionPerformed
@@ -1449,33 +1369,7 @@ public class MainForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         //This method is the same ad the flowBtn above. It is just an extra one in the top menus
         flowBtnActionPerformed(evt);
-        /*style = "Flow";
-         JPanel check = new JPanel();
-         //see if user would like to input information
-         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-         check.add(new JLabel("Would you like to input information for this Flow?"));
-         int yN = JOptionPane.showConfirmDialog(null, check);
-         if (yN == 0) {
-         //if yes, get info
-         //Base values in case someone hits enter to fast, so it wont throw errors
-         JTextField flowName = new JTextField("Flow" + flowArrayList.size());
-         JTextField flowEquation = new JTextField("");
-         JPanel addFlow = new JPanel();
-         addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
-         addFlow.add(new JLabel("Flow Name"));
-         addFlow.add(flowName);
-         addFlow.add(new JLabel("Flow Equation"));
-         addFlow.add(flowEquation);
-         int option = JOptionPane.showConfirmDialog(null, addFlow);
-         inputname = flowName.getText();
-         inputequation = flowEquation.getText();
-         } else {
-         //blank values, stock name increments
-         inputname = "Flow" + flowArrayList.size();
-         //these can NOT be "", they show as null and go haywire
-         inputequation = "";
-         }
-         objectLoc = 2;*/
+
     }//GEN-LAST:event_FlowMenuItemActionPerformed
 
     private void showAllVariableBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllVariableBtnActionPerformed
@@ -1640,81 +1534,8 @@ public class MainForm extends javax.swing.JFrame {
     private void VariableMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_VariableMenuItemActionPerformed
         // TODO add your handling code here:
         variableBtnActionPerformed(evt);
-        /*
-        
 
-         //create variable through the menu at the top of the screen same as above
-         style = "Variable";
-         objectLoc = 4;
-         inputValue = "0.0";
-         JPanel check = new JPanel();
-         check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
-         check.add(new JLabel("Would you like to input information for this Variable?"));
-         int yN = JOptionPane.showConfirmDialog(null, check);
-         if (yN == 0) {
-         //if yes, get info
-         //Base values in case someone hits enter to fast, so it wont throw errors
-         JTextField varName = new JTextField("Variable" + variableArrayList.size());
-         JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
-         JTextField varValue = new JTextField("");
-         JPanel addVar = new JPanel();
-         addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
-         addVar.add(new JLabel("Variable Name"));
-         addVar.add(varName);
-         addVar.add(new JLabel("Variable Symbol"));
-         addVar.add(varSymbol);
-         addVar.add(new JLabel("Variable Value"));
-         addVar.add(varValue);
-         int option = JOptionPane.showConfirmDialog(null, addVar);
-         inputname = varName.getText();
-         inputValue = varValue.getText();
-         inputsymbol = varSymbol.getText();
-         } else {
-         //blank values, variable name increments
-         inputname = "Variable" + variableArrayList.size();
-         //these can NOT be "", they show as null and go haywire
-         inputValue = "0.0";
-         inputsymbol = "v" + +variableArrayList.size();
-         }*/
     }//GEN-LAST:event_VariableMenuItemActionPerformed
-
-    private void arrowComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowComboBoxActionPerformed
-        // TODO add your handling code here:
-        //Allows the selection of different arrow types.
-        String arrowType = arrowComboBox.getSelectedItem().toString();
-        if (arrowType == "Right Arrow") {
-            style = "Arrow";
-            objectLoc = 3;
-        } else if (arrowType == "Upper Left Arrow") {
-            style = "ArrowLU";
-            objectLoc = 5;
-        } else if (arrowType == "Upper Right Arrow") {
-            style = "ArrowRU";
-            objectLoc = 6;
-        } else if (arrowType == "Lower Left Arrow") {
-            style = "ArrowLL";
-            objectLoc = 7;
-        } else if (arrowType == "Lower Right Arrow") {
-            style = "ArrowRL";
-            objectLoc = 8;
-        } else if (arrowType == "Up Arrow") {
-            style = "ArrowU";
-            objectLoc = 9;
-        } else if (arrowType == "Down Arrow") {
-            style = "ArrowD";
-            objectLoc = 10;
-        } else if (arrowType == "Left Arrow") {
-            style = "ArrowL";
-            objectLoc = 11;
-        }
-    }//GEN-LAST:event_arrowComboBoxActionPerformed
-
-    private void arrowLUMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowLUMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a upper left pointing arrow
-        style = "ArrowLU";
-        objectLoc = 5;
-    }//GEN-LAST:event_arrowLUMenuItemActionPerformed
 
     private void arrowRMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowRMenuItemActionPerformed
         // TODO add your handling code here:
@@ -1723,83 +1544,45 @@ public class MainForm extends javax.swing.JFrame {
         objectLoc = 3;
     }//GEN-LAST:event_arrowRMenuItemActionPerformed
 
-    private void arrowLMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowLMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a left pointing arrow
-        style = "ArrowL";
-        objectLoc = 11;
-    }//GEN-LAST:event_arrowLMenuItemActionPerformed
-
-    private void arrowRUMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowRUMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a upper right pointing arrow
-        style = "ArrowRU";
-        objectLoc = 6;
-    }//GEN-LAST:event_arrowRUMenuItemActionPerformed
-
-    private void arrowRLMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowRLMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a lower right pointing arrow
-        style = "ArrowRL";
-        objectLoc = 8;
-    }//GEN-LAST:event_arrowRLMenuItemActionPerformed
-
-    private void arrowLLMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowLLMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a lower left pointing arrow
-        style = "ArrowLL";
-        objectLoc = 7;
-    }//GEN-LAST:event_arrowLLMenuItemActionPerformed
-
-    private void arrowUMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowUMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a up pointing arrow
-        style = "ArrowU";
-        objectLoc = 9;
-    }//GEN-LAST:event_arrowUMenuItemActionPerformed
-
-    private void arrowDMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_arrowDMenuItemActionPerformed
-        // TODO add your handling code here:
-        //sets style and objectLoc variable for a down pointing arrow
-        style = "ArrowD";
-        objectLoc = 10;
-    }//GEN-LAST:event_arrowDMenuItemActionPerformed
-
     private void OpenMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenMenuItemActionPerformed
         // TODO add your handling code here:
         //JSONParser parser = new JSONParser();
-        
+
         JSONParser parser = new JSONParser();
         JFileChooser fc = new JFileChooser();
         int returnVal = fc.showOpenDialog(null);
         //String srcName = "";
-        if (returnVal != JFileChooser.APPROVE_OPTION)
+        if (returnVal != JFileChooser.APPROVE_OPTION) {
             return;
-        
+        }
+
         File srcFile = fc.getSelectedFile();
         //String filename = "srcFile";
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
-        
+
         stockArrayList = JSONRead.readStock(parser, srcFile);
-        for(int i=0;i<stockArrayList.size();i++)
-        {
+        for (int i = 0; i < stockArrayList.size(); i++) {
             AddStock(stockArrayList.get(i));
         }
         flowArrayList = JSONRead.readFlow(parser, srcFile);
-        for(int i=0;i<flowArrayList.size();i++)
-        {
-            AddFlow(flowArrayList.get(i));
+        for (int i = 0; i < flowArrayList.size(); i++) {
+            //AddFlowEdge(flowArrayList.get(i));
         }
         variableArrayList = JSONRead.readVar(parser, srcFile);
-        for(int i=0;i<variableArrayList.size();i++)
-        {
+        for (int i = 0; i < variableArrayList.size(); i++) {
             AddVariable(variableArrayList.get(i));
         }
         String[] mSettings = JSONRead.readSettings(parser, srcFile);
-        modelSettings.initialTime=mSettings[0];
-        modelSettings.finalTime=mSettings[1];
-        modelSettings.timeStep=mSettings[2];
+        modelSettings.initialTime = mSettings[0];
+        modelSettings.finalTime = mSettings[1];
+        modelSettings.timeStep = mSettings[2];
     }//GEN-LAST:event_OpenMenuItemActionPerformed
+
+    private void ArrowbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ArrowbtnActionPerformed
+        // TODO add your handling code here:
+        style = "Arrow";
+        objectLoc = 3;
+    }//GEN-LAST:event_ArrowbtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1840,6 +1623,7 @@ public class MainForm extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem AboutMenuItem;
     private javax.swing.JMenu AddMenu;
+    private javax.swing.JButton Arrowbtn;
     private javax.swing.JMenuItem DeleteMenuItem;
     private javax.swing.JMenu EditMenu;
     private javax.swing.JMenu FileMenu;
@@ -1851,16 +1635,8 @@ public class MainForm extends javax.swing.JFrame {
     private javax.swing.JMenuItem StockMenuItem;
     private javax.swing.JMenuItem VariableMenuItem;
     private javax.swing.JLabel analysisMethodLabel;
-    private javax.swing.JComboBox<String> arrowComboBox;
-    private javax.swing.JMenuItem arrowDMenuItem;
-    private javax.swing.JMenuItem arrowLLMenuItem;
-    private javax.swing.JMenuItem arrowLMenuItem;
-    private javax.swing.JMenuItem arrowLUMenuItem;
-    private javax.swing.JMenuItem arrowRLMenuItem;
     private javax.swing.JMenuItem arrowRMenuItem;
-    private javax.swing.JMenuItem arrowRUMenuItem;
     private javax.swing.JMenu arrowTypes;
-    private javax.swing.JMenuItem arrowUMenuItem;
     private javax.swing.JButton closeBtn;
     private javax.swing.JToggleButton deleteBtn;
     private javax.swing.JButton flowBtn;

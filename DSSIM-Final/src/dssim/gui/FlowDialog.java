@@ -23,6 +23,8 @@
  */
 package dssim.gui;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author paulcuenin
@@ -33,18 +35,30 @@ public class FlowDialog extends javax.swing.JDialog {
      * Creates new form FlowDialog
      */
     FlowObject foFlow;
+    ArrayList<VariableObject> valocArr;
 
-    public FlowDialog(java.awt.Frame parent, boolean modal, FlowObject fo) {
+    public FlowDialog(java.awt.Frame parent, boolean modal, FlowObject fo, ArrayList<VariableObject> varArr) {
         super(parent, modal);
         foFlow = fo;
+        valocArr = varArr;
         initComponents();
         updateComponents();
     }
 
     public void updateComponents() {
-        jTextFieldFlowName.setText(foFlow.getObjName());
+        jTextFieldFlowName.setText(foFlow.getFlowName());
         jTextFieldFlowEquat1.setText(foFlow.getFlowEquation());
-        jTextFieldFlowVariables2.setText("variables here");
+        String variableText = "";
+        for (VariableObject valocArr1 : valocArr) {
+            String vs = valocArr1.getObjName();
+            variableText = variableText + vs + " , ";
+        }
+        jTextFieldFlowVariables2.setText(variableText);
+
+        if (foFlow.superObjectFrom != null && foFlow.superObjectTo != null) {
+            this.jTextFieldFlowFrom.setText(foFlow.superObjectFrom.getObjName());
+            this.jTextFieldFlowTo.setText(foFlow.superObjectTo.getObjName());
+        }
 
     }
 
@@ -66,8 +80,13 @@ public class FlowDialog extends javax.swing.JDialog {
         closeButton = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jTextFieldFlowVariables2 = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jTextFieldFlowFrom = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jTextFieldFlowTo = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Flow Information");
 
         jLabel1.setText("Flow Name");
 
@@ -89,6 +108,16 @@ public class FlowDialog extends javax.swing.JDialog {
 
         jLabel4.setText("Variables");
 
+        jTextFieldFlowVariables2.setEditable(false);
+
+        jLabel5.setText("From");
+
+        jTextFieldFlowFrom.setEditable(false);
+
+        jLabel6.setText("To");
+
+        jTextFieldFlowTo.setEditable(false);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -100,21 +129,34 @@ public class FlowDialog extends javax.swing.JDialog {
                 .addComponent(closeButton)
                 .addContainerGap(172, Short.MAX_VALUE))
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldFlowVariables2))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldFlowEquat1))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldFlowName, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(18, 18, 18)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldFlowVariables2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldFlowEquat1))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldFlowName, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldFlowTo))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextFieldFlowFrom)))))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -124,7 +166,7 @@ public class FlowDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jTextFieldFlowName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jTextFieldFlowEquat1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -132,11 +174,19 @@ public class FlowDialog extends javax.swing.JDialog {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jTextFieldFlowVariables2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(jTextFieldFlowFrom, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel6)
+                    .addComponent(jTextFieldFlowTo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(saveButton)
                     .addComponent(closeButton))
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addGap(34, 34, 34))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -155,14 +205,14 @@ public class FlowDialog extends javax.swing.JDialog {
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
         // TODO add your handling code here:
-        if(!jTextFieldFlowName.getText().equals(foFlow.getObjName())){
+        if (!jTextFieldFlowName.getText().equals(foFlow.getObjName())) {
             foFlow.setObjName(jTextFieldFlowName.getText());
         }
-        if(!jTextFieldFlowEquat1.getText().equals(foFlow.getFlowEquation())){
+        if (!jTextFieldFlowEquat1.getText().equals(foFlow.getFlowEquation())) {
             foFlow.setFlowEquation(jTextFieldFlowEquat1.getText());
         }
         dispose();
-        
+
     }//GEN-LAST:event_saveButtonActionPerformed
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
@@ -207,7 +257,7 @@ public class FlowDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, null);
+                FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, null, null);
 
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
@@ -225,9 +275,13 @@ public class FlowDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField jTextFieldFlowEquat1;
+    private javax.swing.JTextField jTextFieldFlowFrom;
     private javax.swing.JTextField jTextFieldFlowName;
+    private javax.swing.JTextField jTextFieldFlowTo;
     private javax.swing.JTextField jTextFieldFlowVariables2;
     private javax.swing.JButton saveButton;
     // End of variables declaration//GEN-END:variables

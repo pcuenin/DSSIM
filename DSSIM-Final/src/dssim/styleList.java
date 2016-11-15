@@ -50,6 +50,7 @@ public class styleList {
     
     //initailizes the Hashtables that store the data for each individual object
     Hashtable<String, Object> Flow = new Hashtable<>();
+    Hashtable<String, Object> FlowPool = new Hashtable<>();
     Hashtable<String, Object> Stock = new Hashtable<>();
     Hashtable<String, Object> Arrow = new Hashtable<>();
     Hashtable<String, Object> Variable = new Hashtable<>();
@@ -75,11 +76,20 @@ public class styleList {
         Time.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);*/
         
         //creates a style for a flow. 
+        Flow.put(mxConstants.STYLE_RESIZABLE, "false");
+        Flow.put(mxConstants.STYLE_EDITABLE, "false");
+        Flow.put(mxConstants.STYLE_DASHED, "false");
+        Flow.put(mxConstants.STYLE_OPACITY, "100");
+        Flow.put(mxConstants.STYLE_STROKECOLOR, "#0000ff");
+        Flow.put(mxConstants.STYLE_STROKEWIDTH, "6");
+        Flow.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
+        
+        /*
         Flow.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
         Flow.put(mxConstants.STYLE_IMAGE, "file:Images/FlowImg.png");
         Flow.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
         Flow.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        Flow.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
+        Flow.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);*/
         
         //creates a style for a stock
         Stock.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
@@ -88,68 +98,24 @@ public class styleList {
         Stock.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
         Stock.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
         
+        //create a style for flowpool
+        FlowPool.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
+        FlowPool.put(mxConstants.STYLE_IMAGE, "file:Images/FlowPoolImg.png");
+        FlowPool.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
+        FlowPool.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
+        FlowPool.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
+        
         //creates a style for a right facing arrow
-        Arrow.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        Arrow.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        Arrow.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        Arrow.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
+        Arrow.put(mxConstants.STYLE_MOVABLE,"false");
+        
+        //Arrow.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
+        Arrow.put(mxConstants.STYLE_RESIZABLE, "false");
+        Arrow.put(mxConstants.STYLE_EDITABLE, "false");
+        Arrow.put(mxConstants.STYLE_DASHED, "false");
+        Arrow.put(mxConstants.STYLE_OPACITY, "100");
+        Arrow.put(mxConstants.STYLE_STROKECOLOR, "#000000");
+        Arrow.put(mxConstants.STYLE_STROKEWIDTH, "2");
         Arrow.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points to the upper left hand corner
-        ArrowLU.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowLU.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowLU.put(mxConstants.STYLE_ROTATION,240);
-        ArrowLU.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowLU.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowLU.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points to the upper right hand corner
-        ArrowRU.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowRU.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowRU.put(mxConstants.STYLE_ROTATION,300);
-        ArrowRU.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowRU.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowRU.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points to the lower left hand corner
-        ArrowLL.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowLL.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowLL.put(mxConstants.STYLE_ROTATION,120);
-        ArrowLL.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowLL.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowLL.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points to the lower right hand corner
-        ArrowRL.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowRL.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowRL.put(mxConstants.STYLE_ROTATION,50);
-        ArrowRL.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowRL.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowRL.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points straight up
-        ArrowU.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowU.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowU.put(mxConstants.STYLE_ROTATION,270);
-        ArrowU.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowU.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowU.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points straight down 
-        ArrowD.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowD.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowD.put(mxConstants.STYLE_ROTATION,90);
-        ArrowD.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowD.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowD.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
-        
-        //creates an arrow that points to the left
-        ArrowL.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
-        ArrowL.put(mxConstants.STYLE_IMAGE, "file:Images/ArrowImg.png");
-        ArrowL.put(mxConstants.STYLE_ROTATION,180);
-        ArrowL.put(mxConstants.STYLE_STROKEWIDTH, 1.5);
-        ArrowL.put(mxConstants.STYLE_STROKECOLOR, mxUtils.getHexColorString(new Color(0, 0, 170)));
-        ArrowL.put(mxConstants.STYLE_VERTICAL_LABEL_POSITION, mxConstants.ALIGN_BOTTOM);
         
         //creates a variable
         Variable.put(mxConstants.STYLE_SHAPE, mxConstants.STYLE_IMAGE);
@@ -178,7 +144,11 @@ public class styleList {
         Hashtable<String, Object> x = this.Variable;
         return x;
     }
-    
+    public Hashtable<String, Object> getFlowPool(){
+        Hashtable<String, Object> x = this.FlowPool;
+        return x;
+    }
+    /*
     public Hashtable<String, Object> getArrowLU(){
        Hashtable<String, Object> x = this.ArrowLU;
         return x;
@@ -211,7 +181,7 @@ public class styleList {
     public Hashtable<String, Object> getArrowL(){
        Hashtable<String, Object> x = this.ArrowL;
         return x;
-    }
+    }*/
     
 }
 

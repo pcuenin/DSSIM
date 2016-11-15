@@ -24,6 +24,7 @@
 package dssim.gui;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 /**
  *
@@ -48,13 +49,18 @@ public class StockDialog extends javax.swing.JDialog {
     public void updateComponents() {
         jTextFieldStockName.setText(soStock.getObjName());
         jTextFieldStockDesc.setText(soStock.getStockDescrip());
+        Vector<ModelingObject> inputs = soStock.getInputs();
+        Vector<ModelingObject> outputs = soStock.getOutputs();
+        // find flow equations and pull their equation to text
+        
         jTextFieldStockEquation1.setText("equation goes here");
         
         jTextFieldStockIniVal2.setText(soStock.getStockInitial());
         String variableText = "";
         for (VariableObject valocArr1 : valocArr) {
             String vs = valocArr1.getObjName();
-            variableText = variableText + " , " + vs;
+            variableText = variableText  + vs+ " , ";
+          
         }
         jTextFieldStockVariables3.setText(variableText);
         
@@ -83,6 +89,7 @@ public class StockDialog extends javax.swing.JDialog {
         jTextFieldStockVariables3 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Stock Information");
 
         stocknameLabel1.setText("Stock Name");
 

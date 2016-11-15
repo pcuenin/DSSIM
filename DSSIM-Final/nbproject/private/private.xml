@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
-    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="6">
+        <file>
+            <url>src/dssim/MainForm.java</url>
+            <bookmark id="6">
+                <name/>
+                <line>135</line>
+                <key/>
+            </bookmark>
+            <bookmark id="3">
+                <name/>
+                <line>227</line>
+                <key/>
+            </bookmark>
+        </file>
+    </editor-bookmarks>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/JSONSave.java</file>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/JSONRead.java</file>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/gui/FlowDialog.java</file>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/Methods.java</file>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/ModelSettings.java</file>
-            <file>file:/C:/Users/kamre_000/Desktop/Git-DSSIM-Mod/DSSIM/DSSIM-Final/src/dssim/MainForm.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/MainForm.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/ArrowObject.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/ModelingObject.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/styleList.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/ConnectableModelObject.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/StockObject.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/VariableObject.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/JSONRead.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/FlowDialog.java</file>
+            <file>file:/Users/paulcuenin/Desktop/DSSIM-Final/DSSIM-Final/src/dssim/gui/FlowObject.java</file>
         </group>
     </open-files>
 </project-private>

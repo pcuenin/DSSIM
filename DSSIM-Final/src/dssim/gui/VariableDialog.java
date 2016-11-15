@@ -23,6 +23,8 @@
  */
 package dssim.gui;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author paulcuenin
@@ -33,10 +35,12 @@ public class VariableDialog extends javax.swing.JDialog {
      * Creates new form ArrowDialog
      */
     VariableObject voVariable;
+    ArrayList<VariableObject> valocArr;
 
-    public VariableDialog(java.awt.Frame parent, boolean modal, VariableObject vo) {
+    public VariableDialog(java.awt.Frame parent, boolean modal, VariableObject vo, ArrayList<VariableObject> varArr) {
         super(parent, modal);
         voVariable = vo;
+        valocArr = varArr;
         initComponents();
         updateComponents();
     }
@@ -44,8 +48,13 @@ public class VariableDialog extends javax.swing.JDialog {
     public void updateComponents() {
         jTextFieldVarName.setText(voVariable.getObjName());
 
-        jTextFieldVarEquation1.setText("equation goes here");
-        jTextFieldVarVariables3.setText("Variable Pull Down here");
+        jTextFieldVarEquation1.setText(voVariable.getVarInitial());
+        String variableText = "";
+        for (VariableObject valocArr1 : valocArr) {
+            String vs = valocArr1.getObjName();
+            variableText = variableText + vs + " , ";
+        }
+        jTextFieldVarVariables3.setText(variableText);
 
     }
 
@@ -69,6 +78,7 @@ public class VariableDialog extends javax.swing.JDialog {
         jTextFieldVarVariables3 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Variable Information");
 
         varnameLabel1.setText("Variable Name");
 
@@ -89,6 +99,8 @@ public class VariableDialog extends javax.swing.JDialog {
         });
 
         jLabelvariable5.setText("Variables");
+
+        jTextFieldVarVariables3.setEditable(false);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -166,8 +178,12 @@ public class VariableDialog extends javax.swing.JDialog {
 
     private void jButtonSave2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonSave2ActionPerformed
         // TODO add your handling code here:
-        if(!this.jTextFieldVarName.getText().equals(voVariable.getObjName())){
+        if (!this.jTextFieldVarName.getText().equals(voVariable.getObjName())) {
             voVariable.setObjName(jTextFieldVarName.getText());
+
+        }
+        if (!this.jTextFieldVarEquation1.getText().equals(voVariable.getVarInitial())) {
+            voVariable.setVarInitial(jTextFieldVarEquation1.getText());
         }
         dispose();
     }//GEN-LAST:event_jButtonSave2ActionPerformed
@@ -209,7 +225,7 @@ public class VariableDialog extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                VariableDialog dialog = new VariableDialog(new javax.swing.JFrame(), true, null);
+                VariableDialog dialog = new VariableDialog(new javax.swing.JFrame(), true, null, null);
 
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
