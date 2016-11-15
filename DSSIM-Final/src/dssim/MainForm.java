@@ -57,17 +57,14 @@ import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
 
 import java.io.FileWriter;
-import java.io.FileReader;
 import java.io.IOException;
 import org.json.simple.parser.JSONParser;
-
 
 import dssim.gui.ArrowDialog;
 import dssim.gui.FlowDialog;
 import dssim.gui.StockDialog;
 import dssim.gui.VariableDialog;
 import java.util.Map;
-
 
 public class MainForm extends javax.swing.JFrame {
 
@@ -86,6 +83,7 @@ public class MainForm extends javax.swing.JFrame {
     String style = "";
     styleList stylelist = new styleList(this);
     ModelSettings modelSettings = new ModelSettings();
+    ProgressBar progressBar = new ProgressBar();
 
     String inputname;
     String inputsymbol;
@@ -93,7 +91,7 @@ public class MainForm extends javax.swing.JFrame {
     String inputequation;
     String inputValue;
 
-    /*these ArrayLists are for keeping track of the graph objects placed by the user. 
+    /*these ArrayLists are for keeping track of the graph objects placed by the user.
      another method could be to keep track
      by using a hashtable. Yet, arraylists have very useful methods. */
     public ArrayList<StockObject> stockArrayList = new ArrayList<StockObject>();
@@ -107,7 +105,7 @@ public class MainForm extends javax.swing.JFrame {
     public MainForm() {
 
         initComponents();
-        //This sets up the inital graph. This is what all the objects are added to. 
+        //This sets up the inital graph. This is what all the objects are added to.
         graph = new mxGraph() {
             public boolean isCellMovable(Object cell) {
                 return isCellsMovable() && !isCellLocked(cell) && !getModel().isVertex(getModel().getParent(cell));
@@ -141,8 +139,8 @@ public class MainForm extends javax.swing.JFrame {
             public void mousePressed(MouseEvent e) {
                 cell = graphComponent.getCellAt(e.getX(), e.getY());
 
-                if (e.getClickCount() >= 2) { 
-                    
+                if (e.getClickCount() >= 2) {
+
                     // if the item is double clicked PMC 100716
                     //figure out what type of object they double clicked
                     // args back when you figure that out
@@ -156,18 +154,17 @@ public class MainForm extends javax.swing.JFrame {
                         StockObject so = getStock(mxobj);
                         StockDialog dialog = new StockDialog(new javax.swing.JFrame(), true, so, variableArrayList);
                         dialog.setVisible(true);
-                        
+
                     } else if (objst.equals("Flow")) {
                         // do Flow dialog
                         FlowObject fo = getFlow(mxobj);
                         FlowDialog dialog = new FlowDialog(new javax.swing.JFrame(), true, fo);
                         dialog.setVisible(true);
-                        
+
                     } else if (objst.equals("Arrow")) {  // not flow not stock must be arrow
                         ArrowObject ao = getArrow(mxobj); // find the arrow object from the mxcell
                         ArrowDialog dialog = new ArrowDialog(new javax.swing.JFrame(), true, ao);
                         dialog.setVisible(true);
-                        
 
                         //ArrowDialog.main(ao); // pass the arrow object to the the arrow dialog
                     } else {
@@ -177,17 +174,17 @@ public class MainForm extends javax.swing.JFrame {
                         dialog.setVisible(true);
 
                     }
-                    // for look through each stock/flow/arrow array to find the object 
+                    // for look through each stock/flow/arrow array to find the object
                     //
                     // then call the form based on the result
 
-                     // use graph to access info about vertex
+                    // use graph to access info about vertex
                     //how are the objects stored... need visual
                 }
 
                 // different objectLoc will call different Add functions
                 if (objectLoc == 1) {
-                    
+
                     AddStock(inputname, style, inputsymbol, inputinitial, inputequation, e.getX(), e.getY());
                     objectLoc = -1;
                 } else if (objectLoc == 2) {
@@ -249,7 +246,6 @@ public class MainForm extends javax.swing.JFrame {
         Point point = new Point(0, 0);
         Cursor cursor = toolkit.createCustomCursor(img, point, "Cursor");
 
-
         graphComponent.setCursor(cursor); // still doesn't work PMC
 
         //jPanel1.setCursor(cursor); // still doesn't work PMC
@@ -259,7 +255,7 @@ public class MainForm extends javax.swing.JFrame {
     }
 
 //This method will add a stock to the graph
-   void AddStock(String name, String styleName,
+    void AddStock(String name, String styleName,
             String inputsymbol, String inputinitial, String inputequation, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -270,11 +266,11 @@ public class MainForm extends javax.swing.JFrame {
         Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
 
         graph.getModel().endUpdate();
-        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial,x+"",y+"");
+        StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial, x + "", y + "");
         stockArrayList.add(stockobject);
     }
 
-   // This method will add a stock to the graph from a save file
+    // This method will add a stock to the graph from a save file
     void AddStock(StockObject stock) {
         //Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -282,18 +278,17 @@ public class MainForm extends javax.swing.JFrame {
         graph.setCellsCloneable(false);
         graph.getModel().beginUpdate();
         //stockObject is created and added to the stockArrayList
-       /* Object node = graph.insertVertex(parent, null, stock.getStockName(), Integer.parseInt(stock.getStockX()), 
-                Integer.parseInt(stock.getStockY()), 100, 50, "Stock");//draw the node
-        */
+       /* Object node = graph.insertVertex(parent, null, stock.getStockName(), Integer.parseInt(stock.getStockX()),
+         Integer.parseInt(stock.getStockY()), 100, 50, "Stock");//draw the node
+         */
         graph.getModel().endUpdate();
-        /*StockObject stockobject = new StockObject(node,stock.getStockName(), stock.getStockDescrip(), 
-                stock.getStockInitial(),stock.getStockX(),stock.getStockY());
-        stockArrayList.add(stockobject);*/
+        /*StockObject stockobject = new StockObject(node,stock.getStockName(), stock.getStockDescrip(),
+         stock.getStockInitial(),stock.getStockX(),stock.getStockY());
+         stockArrayList.add(stockobject);*/
     }
 // This method will add a flow to the graph from the user input
 
 // This method will add a flow to the graph
-
     // get arrow object from mxCell
     ArrowObject getArrow(mxCell mxc) {
         ArrowObject ao;
@@ -306,8 +301,8 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
-     // get stock object from mxCell
+
+    // get stock object from mxCell
     StockObject getStock(mxCell mxc) {
         StockObject so;
         for (int i = 0; i < stockArrayList.size(); i++) {
@@ -319,7 +314,7 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
+
     // get stock flow from mxCell
     FlowObject getFlow(mxCell mxc) {
         FlowObject fo;
@@ -332,7 +327,7 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
-    
+
     // get variable from mxCell
     VariableObject getVar(mxCell mxc) {
         VariableObject vo;
@@ -346,7 +341,6 @@ public class MainForm extends javax.swing.JFrame {
         return null;
     }
 
-
     void AddFlow(String name, String styleName, int x, int y) {
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
@@ -356,10 +350,8 @@ public class MainForm extends javax.swing.JFrame {
         try {
             //flowObject is added to the flowArrayList
             Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-            FlowObject flowobject = new FlowObject(node, inputname, inputequation,x+"",y+"");
+            FlowObject flowobject = new FlowObject(node, inputname, inputequation, x + "", y + "");
             flowArrayList.add(flowobject);
-
-            
 
             mxCell flow = (mxCell) node;
             flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
@@ -369,14 +361,15 @@ public class MainForm extends javax.swing.JFrame {
         }
     }
 // This method will add a flow to the graph from a save file
+
     void AddFlow(FlowObject flow) {
         //Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(false);
         graph.setCellsBendable(false);
         graph.setCellsCloneable(false);
         graph.getModel().beginUpdate();
-            graph.getModel().endUpdate();
-        
+        graph.getModel().endUpdate();
+
     }
 // This method will add a right pointing arrow to the graph
 
@@ -389,7 +382,7 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().beginUpdate();
         try {
             Object node = graph.insertVertex(parent, null, null, x, y, 100, 50, styleName);//draw the node
-            ArrowObject arrowobject = new ArrowObject("arrow",node);
+            ArrowObject arrowobject = new ArrowObject("arrow", node);
             this.arrowArrayList.add(arrowobject);
         } finally {
             graph.getModel().endUpdate();
@@ -514,20 +507,21 @@ public class MainForm extends javax.swing.JFrame {
         try {
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
             VariableObject variableobject = new VariableObject(node, inputName,
-                    inputSymbol, inputInitial,x+"",y+"");
+                    inputSymbol, inputInitial, x + "", y + "");
             variableArrayList.add(variableobject);
         } finally {
             graph.getModel().endUpdate();
         }
     }
+
     void AddVariable(VariableObject var) {
-        
+
         graphComponent.setConnectable(true);
         graph.setCellsCloneable(false);
         graph.setCellsBendable(false);
         graph.getModel().beginUpdate();
 
-            graph.getModel().endUpdate();
+        graph.getModel().endUpdate();
 
     }
 
@@ -901,7 +895,7 @@ public class MainForm extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(modelSettingsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(modelSettingsBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(runSimBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -944,8 +938,8 @@ public class MainForm extends javax.swing.JFrame {
                                 .addComponent(analysisMethodLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(methodChoiceCombo, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 621, Short.MAX_VALUE)))
+                        .addGap(31, 31, 31)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 601, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -960,71 +954,60 @@ public class MainForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         //Brings up file chooser as to where to save objects
         JSONSave savefile = new JSONSave();
-        int returnVal = fc.showSaveDialog(MainForm.this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            try {  
-              
-            // Writing to a file  
-           JFileChooser chooser=new JFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.showSaveDialog(null);
+        try {
 
-            String path=chooser.getSelectedFile().getAbsolutePath();
-            String filename=chooser.getSelectedFile().getName();
-            File newSaveFile=new File(path,filename);  
-            newSaveFile.createNewFile(); 
-            FileWriter fileWriter = new FileWriter(newSaveFile);  //temp hardcoded file location
-            
-            fileWriter.write("{ \n"); 
-            fileWriter.write("\"Stocks\" : \n"); 
-            System.out.println("Writing JSON objects to file");  
-            System.out.println("-----------------------"); 
-            JSONArray stockList = new JSONArray();
-            for (int i = 0; i < stockArrayList.size(); i++) {
-                JSONObject stockObj = savefile.saveStock(stockArrayList.get(i));
-                stockList.add(stockObj);
-            }        
-            fileWriter.write(stockList.toJSONString()+", \n"); 
-            fileWriter.write("\n");
-            fileWriter.write("\"Flows\" : \n"); 
-            fileWriter.flush();
-            JSONArray flowList = new JSONArray();
-            for (int i = 0; i < flowArrayList.size(); i++)
-            {
-               JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
-               flowList.add(flowObj);
+            // Writing to a file
+            JFileChooser chooser = new JFileChooser();
+            int retrival = chooser.showSaveDialog(null);
+            if (retrival == JFileChooser.APPROVE_OPTION) {
+                FileWriter fileWriter = new FileWriter(chooser.getSelectedFile() + ".dsm");
+                fileWriter.write("{ \n");
+                fileWriter.write("\"Stocks\" : \n");
+                System.out.println("Writing JSON objects to file");
+                System.out.println("-----------------------");
+                JSONArray stockList = new JSONArray();
+                for (int i = 0; i < stockArrayList.size(); i++) {
+                    JSONObject stockObj = savefile.saveStock(stockArrayList.get(i));
+                    stockList.add(stockObj);
+                }
+                fileWriter.write(stockList.toJSONString() + ", \n");
+                fileWriter.write("\n");
+                fileWriter.write("\"Flows\" : \n");
+                fileWriter.flush();
+                JSONArray flowList = new JSONArray();
+                for (int i = 0; i < flowArrayList.size(); i++) {
+                    JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
+                    flowList.add(flowObj);
+                }
+
+                fileWriter.write(flowList.toJSONString() + ", \n");
+                fileWriter.write("\n");
+                fileWriter.write("\"Variables\" : \n");
+                fileWriter.flush();
+                JSONArray varList = new JSONArray();
+                for (int i = 0; i < variableArrayList.size(); i++) {
+                    JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
+                    varList.add(varObj);
+                }
+                fileWriter.write(varList.toJSONString() + "\n");
+                fileWriter.flush();
+                for (int i = 0; i < arrowArrayList.size(); i++) {
+
+                }
+                fileWriter.write("\n");
+                fileWriter.write("\"Model Settings\" : \n");
+                JSONObject settings = savefile.saveSettings(modelSettings);
+                fileWriter.write(settings.toJSONString() + ", \n");
+                fileWriter.write("}");
+                fileWriter.close();
+                System.out.println("Finished writing file");
             }
-            
-            fileWriter.write(flowList.toJSONString()+", \n"); 
-            fileWriter.write("\n"); 
-            fileWriter.write("\"Variables\" : \n"); 
-            fileWriter.flush();
-            JSONArray varList = new JSONArray();
-            for (int i = 0; i < variableArrayList.size(); i++)
-            {
-               JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
-               varList.add(varObj);
-            }
-            fileWriter.write(varList.toJSONString()+"\n");  
-            fileWriter.flush();
-            for (int i = 0; i < arrowArrayList.size(); i++)
-            {
-               
-                
-            }   
-            fileWriter.write("\n"); 
-            fileWriter.write("\"Model Settings\" : \n"); 
-            JSONObject settings = savefile.saveSettings(modelSettings);
-            fileWriter.write(settings.toJSONString()+", \n");  
-            fileWriter.write("}");   
-            fileWriter.close();
-            System.out.println("Finished writing file");
-  
-        } catch (IOException e) {  
-            e.printStackTrace();  
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-            
-        }
+
+
     }//GEN-LAST:event_SaveMenuItemActionPerformed
 
     private void AboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AboutMenuItemActionPerformed
@@ -1038,7 +1021,7 @@ public class MainForm extends javax.swing.JFrame {
     private void runSimBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runSimBtnActionPerformed
 
         Methods method2 = new Methods();
-        
+
         for (int i = 0; i < stockArrayList.size(); i++) {
             String s = stockArrayList.get(i).getObjName();
             final JTextField stockName = new JTextField(s);
@@ -1052,8 +1035,8 @@ public class MainForm extends javax.swing.JFrame {
         }
         //one improvement is to make things like Double.parseDouble(modelSettings.getFinalTime() static variables
        /* Object node = graph.createVertex(null, null, "t", 0, 0, 100, 50, "Time");
-        VariableObject time = new VariableObject(node,"t","t",modelSettings.getInitialTime(),"0","0");
-        variableArrayList.add(time);*/
+         VariableObject time = new VariableObject(node,"t","t",modelSettings.getInitialTime(),"0","0");
+         variableArrayList.add(time);*/
         method2 = new Methods((ArrayList) stockArrayList, flowArrayList, variableArrayList,
                 Double.parseDouble(modelSettings.getInitialTime()),
                 Double.parseDouble(modelSettings.getFinalTime()), Double.parseDouble(modelSettings.getTimeStep()),
@@ -1065,6 +1048,16 @@ public class MainForm extends javax.swing.JFrame {
         //try to reset data
         data = null;
         //call the data model
+        if (!progressBar.isFrameAvailable()) {
+            JFrame jf = new JFrame();
+            jf.add(progressBar);
+            progressBar.setFrame(jf);
+            jf.setSize(340, 270);
+            jf.setResizable(false);
+            jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        }
+
+        progressBar.setVisible(true);
         data = method2.returnData();
     }//GEN-LAST:event_runSimBtnActionPerformed
 
@@ -1212,25 +1205,25 @@ public class MainForm extends javax.swing.JFrame {
         //JPanel check = new JPanel();
         //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
         //check.add(new JLabel("Would you like to input information for this Variable?"));
-        
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField varName = new JTextField("Variable" + variableArrayList.size());
-            JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
-            JTextField varValue = new JTextField("0.0");
-            JPanel addVar = new JPanel();
-            addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
-            addVar.add(new JLabel("Variable Name"));
-            addVar.add(varName);
-            addVar.add(new JLabel("Variable Symbol"));
-            addVar.add(varSymbol);
-            addVar.add(new JLabel("Variable Value"));
-            addVar.add(varValue);
-            int option = JOptionPane.showConfirmDialog(null, addVar,"Add a Variable", JOptionPane.PLAIN_MESSAGE);
-            inputname = varName.getText();
-            inputValue = varValue.getText();
-            inputsymbol = varSymbol.getText();
-        
+
+        //if yes, get info
+        //Base values in case someone hits enter to fast, so it wont throw errors
+        JTextField varName = new JTextField("Variable" + variableArrayList.size());
+        JTextField varSymbol = new JTextField("Variable" + variableArrayList.size());
+        JTextField varValue = new JTextField("0.0");
+        JPanel addVar = new JPanel();
+        addVar.setLayout(new BoxLayout(addVar, BoxLayout.PAGE_AXIS));
+        addVar.add(new JLabel("Variable Name"));
+        addVar.add(varName);
+        addVar.add(new JLabel("Variable Symbol"));
+        addVar.add(varSymbol);
+        addVar.add(new JLabel("Variable Value"));
+        addVar.add(varValue);
+        int option = JOptionPane.showConfirmDialog(null, addVar, "Add a Variable", JOptionPane.PLAIN_MESSAGE);
+        inputname = varName.getText();
+        inputValue = varValue.getText();
+        inputsymbol = varSymbol.getText();
+
     }//GEN-LAST:event_variableBtnActionPerformed
 
     private void closeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeBtnActionPerformed
@@ -1281,10 +1274,10 @@ public class MainForm extends javax.swing.JFrame {
         stockBtnActionPerformed(evt);
 
     }//GEN-LAST:event_StockMenuItemActionPerformed
-    public static mxGraph getGraph(){
+    public static mxGraph getGraph() {
         return graph;
-    } 
-    
+    }
+
     private void DeleteMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DeleteMenuItemActionPerformed
         // TODO add your handling code here:
         deleteBtnActionPerformed(evt);
@@ -1407,23 +1400,23 @@ public class MainForm extends javax.swing.JFrame {
         //check.setLayout(new BoxLayout(check, BoxLayout.PAGE_AXIS));
         //check.add(new JLabel("Would you like to input information for this Flow?"));
         //int yN = JOptionPane.showConfirmDialog(null, check);
-        
-            //if yes, get info
-            //Base values in case someone hits enter to fast, so it wont throw errors
-            JTextField flowName = new JTextField("Flow" + flowArrayList.size());
-            JTextField flowEquation = new JTextField("");
-            JPanel addFlow = new JPanel();
-            addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
-           
-            addFlow.add(new JLabel("Flow Name"));
-            addFlow.add(flowName);
-            addFlow.add(new JLabel("Flow Equation"));
-            addFlow.add(flowEquation);
-            
-            int option = JOptionPane.showConfirmDialog(null, addFlow,"Add a Flow", JOptionPane.PLAIN_MESSAGE);
-            inputname = flowName.getText();
-            inputequation = flowEquation.getText();
-        
+
+        //if yes, get info
+        //Base values in case someone hits enter to fast, so it wont throw errors
+        JTextField flowName = new JTextField("Flow" + flowArrayList.size());
+        JTextField flowEquation = new JTextField("");
+        JPanel addFlow = new JPanel();
+        addFlow.setLayout(new BoxLayout(addFlow, BoxLayout.PAGE_AXIS));
+
+        addFlow.add(new JLabel("Flow Name"));
+        addFlow.add(flowName);
+        addFlow.add(new JLabel("Flow Equation"));
+        addFlow.add(flowEquation);
+
+        int option = JOptionPane.showConfirmDialog(null, addFlow, "Add a Flow", JOptionPane.PLAIN_MESSAGE);
+        inputname = flowName.getText();
+        inputequation = flowEquation.getText();
+
         objectLoc = 2;
         //AddFlow(response, style);
     }//GEN-LAST:event_flowBtnActionPerformed
@@ -1628,7 +1621,7 @@ public class MainForm extends javax.swing.JFrame {
         // TODO add your handling code here:
         variableBtnActionPerformed(evt);
         /*
-        
+
 
          //create variable through the menu at the top of the screen same as above
          style = "Variable";
@@ -1755,39 +1748,68 @@ public class MainForm extends javax.swing.JFrame {
     private void OpenMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenMenuItemActionPerformed
         // TODO add your handling code here:
         //JSONParser parser = new JSONParser();
-        
+
         JSONParser parser = new JSONParser();
-        JFileChooser fc = new JFileChooser();
+        JFileChooser fc = new JFileChooser("C:");
+        fc.setDialogTitle("Select Model");
+        fc.setFileFilter(new dsmFilter());
         int returnVal = fc.showOpenDialog(null);
         //String srcName = "";
-        if (returnVal != JFileChooser.APPROVE_OPTION)
+        if (returnVal != JFileChooser.APPROVE_OPTION) {
             return;
-        
+        }
+
         File srcFile = fc.getSelectedFile();
         //String filename = "srcFile";
         graph.removeCells(graph.getChildVertices(graph.getDefaultParent()));
-        
+
         stockArrayList = JSONRead.readStock(parser, srcFile);
-        for(int i=0;i<stockArrayList.size();i++)
-        {
+        for (int i = 0; i < stockArrayList.size(); i++) {
             AddStock(stockArrayList.get(i));
         }
         flowArrayList = JSONRead.readFlow(parser, srcFile);
-        for(int i=0;i<flowArrayList.size();i++)
-        {
+        for (int i = 0; i < flowArrayList.size(); i++) {
             AddFlow(flowArrayList.get(i));
         }
         variableArrayList = JSONRead.readVar(parser, srcFile);
-        for(int i=0;i<variableArrayList.size();i++)
-        {
+        for (int i = 0; i < variableArrayList.size(); i++) {
             AddVariable(variableArrayList.get(i));
         }
-        String[] mSettings = JSONRead.readSettings(parser, srcFile);
-        modelSettings.initialTime=mSettings[0];
-        modelSettings.finalTime=mSettings[1];
-        modelSettings.timeStep=mSettings[2];
-    }//GEN-LAST:event_OpenMenuItemActionPerformed
+        if (!modelSettings.isFrameAvailable()) {
+            JFrame jf = new JFrame();
+            jf.add(modelSettings);
+            modelSettings.setFrame(jf);
+            jf.setSize(340, 270);
+            jf.setResizable(false);
+            jf.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            String[] mSettings = JSONRead.readSettings(parser, srcFile);
 
+            modelSettings.initialTime = mSettings[0];
+            modelSettings.initialTimeTField.setText(mSettings[0]);
+
+            modelSettings.finalTime = mSettings[1];
+            modelSettings.finalTimeTField.setText(mSettings[1]);
+
+            modelSettings.timeStep = mSettings[2];
+            modelSettings.timeStepTField.setText(mSettings[2]);
+        } else {
+            String[] mSettings = JSONRead.readSettings(parser, srcFile);
+
+            modelSettings.initialTime = mSettings[0];
+            modelSettings.initialTimeTField.setText(mSettings[0]);
+
+            modelSettings.finalTime = mSettings[1];
+            modelSettings.finalTimeTField.setText(mSettings[1]);
+
+            modelSettings.timeStep = mSettings[2];
+            modelSettings.timeStepTField.setText(mSettings[2]);
+        }
+
+
+    }//GEN-LAST:event_OpenMenuItemActionPerformed
+   /* private javax.swing.JProgressBar getProgressBar(){
+        return pbar;
+    }*/
     /**
      * @param args the command line arguments
      */
@@ -1795,7 +1817,7 @@ public class MainForm extends javax.swing.JFrame {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {

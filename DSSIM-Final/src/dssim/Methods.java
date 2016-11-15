@@ -41,13 +41,15 @@ public final class Methods {
 
     //this data type is from the jfreechart library
     public XYSeriesCollection data;
+    
     //as well as this one, this one allows an x y type table setup
     public DefaultTableModel tableModel = new DefaultTableModel();
     //these array lists are instantiated here to be used as global values to be passed to the mainform
     public ArrayList<Argument> argumentList = new ArrayList<Argument>();
     public ArrayList<Argument> variableArgList = new ArrayList<Argument>();
     public ArrayList<Double> y0 = new ArrayList<Double>();
-
+    public int status=0;
+    //public javax.swing.JProgressBar pbar= getProgressBar();
     public Methods() {
         // what is this doing? -PMC
     }
@@ -105,7 +107,10 @@ public final class Methods {
         }
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
-        int cutoff = String.valueOf(t).length()-1;
+        
+        //javax.swing.JProgressBar progress = new javax.swing.JProgressBar(0,numSteps);
+        
+        //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -161,10 +166,11 @@ public final class Methods {
         tableModel.setColumnIdentifiers(columns); // set the column headers
 
         for (int n = 0; n < numSteps; n++) {
-            t = t0 + (n*stepSize);
-            
-            t = Math.floor(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
-            variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+            status++;
+            t = t0 + (n * stepSize);
+
+            //t = Math.floor(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
+            variableArgList.get(variableArgList.size() - 1).setArgumentValue(t);
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
 
@@ -175,8 +181,8 @@ public final class Methods {
 
             //next let's find k2:
             for (int i = 0; i < numOfStocks; i++) {
-                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+(stepSize/2));
-                value = (argumentList.get(i).getArgumentValue() + (k1.get(i)/ 2));
+                variableArgList.get(variableArgList.size() - 1).setArgumentValue(t + (stepSize / 2));
+                value = (argumentList.get(i).getArgumentValue() + (k1.get(i) / 2));
                 aTempArgArrayList.get(i).setArgumentValue(value);
 
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
@@ -187,8 +193,8 @@ public final class Methods {
 
             //next let's find k3:
             for (int i = 0; i < numOfStocks; i++) {
-                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+(stepSize/2));
-                value = argumentList.get(i).getArgumentValue() + (k2.get(i)/ 2);
+                variableArgList.get(variableArgList.size() - 1).setArgumentValue(t + (stepSize / 2));
+                value = argumentList.get(i).getArgumentValue() + (k2.get(i) / 2);
                 aTempArgArrayList.get(i).setArgumentValue(value);
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
             }
@@ -198,8 +204,8 @@ public final class Methods {
 
             //next let's find k4:
             for (int i = 0; i < numOfStocks; i++) {
-                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+stepSize);
-                value = argumentList.get(i).getArgumentValue() + (k3.get(i) );
+                variableArgList.get(variableArgList.size() - 1).setArgumentValue(t + stepSize);
+                value = argumentList.get(i).getArgumentValue() + (k3.get(i));
                 aTempArgArrayList.get(i).setArgumentValue(value);
                 dydt = RightHandSide(variableArgList, aTempArgArrayList, flowArrayList);
             }
@@ -214,12 +220,12 @@ public final class Methods {
                 //value = Math.ceil(value * 1000000) / 1000000;
                 argumentList.get(i).setArgumentValue(value);
             }
-            
+
             int row = n + 1;
             //double tablex=row*stepSize;
             //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
-            tableStrings[0] = Double.toString(row*stepSize);
-            for (int col = 0; col < stockArrayList.size(); col++) {   
+            tableStrings[0] = Double.toString(row * stepSize);
+            for (int col = 0; col < stockArrayList.size(); col++) {
                 //tableStrings[col + 1] = Double.toString(Math.floor(argumentList.get(col).getArgumentValue()* Math.pow(10,cutoff)) / Math.pow(10,cutoff));
                 tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
             }
@@ -249,6 +255,7 @@ public final class Methods {
         //double numSteps = (tF - t0) / stepSize;
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
+        //javax.swing.JProgressBar progress = new javax.swing.JProgressBar(0,numSteps);
         //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
@@ -297,9 +304,10 @@ public final class Methods {
         tableModel.setColumnIdentifiers(columns); // set the labels
 
         for (int n = 0; n < numSteps; n++) {
-             t = t0 + (n*stepSize);
-             variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+            status++;
+            t = t0 + (n * stepSize);
             //t = Math.ceil(t * 10000) / 10000;
+            variableArgList.get(variableArgList.size() - 1).setArgumentValue(t);
 
             //Let's find k1:
             dydt = RightHandSide(variableArgList, argumentList, flowArrayList);
@@ -311,7 +319,7 @@ public final class Methods {
 
             //next let's find k2:
             for (int i = 0; i < numOfStocks; i++) {
-                variableArgList.get(variableArgList.size()-1).setArgumentValue(t+stepSize);
+                variableArgList.get(variableArgList.size() - 1).setArgumentValue(t + stepSize);
                 value = (argumentList.get(i).getArgumentValue() + (k1.get(i)));
                 aTempArgArrayList.get(i).setArgumentValue(value);
 
@@ -323,7 +331,6 @@ public final class Methods {
             for (int i = 0; i < numOfStocks; i++) {
 
                 value = (argumentList.get(i).getArgumentValue() + ((k1.get(i) + k2.get(i)) / 2));
-                //value = Math.ceil(value * 10000) / 10000;
                 argumentList.get(i).setArgumentValue(value);
 
             }
@@ -331,10 +338,10 @@ public final class Methods {
             int row = n + 1;
             //double tablex=row*stepSize;
             //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
-            tableStrings[0] = Double.toString(row*stepSize);
+            tableStrings[0] = Double.toString(row * stepSize);
             for (int col = 0; col < stockArrayList.size(); col++) {
                 tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
-                
+
             }
             tableModel.addRow(tableStrings);
 
@@ -362,7 +369,8 @@ public final class Methods {
         }
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
-        int cutoff = String.valueOf(t).length()-1;
+        //javax.swing.JProgressBar pbar = new javax.swing.JProgressBar(0,numSteps);
+        //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
@@ -405,8 +413,9 @@ public final class Methods {
         tableModel.setColumnIdentifiers(columns); // set the labels
 
         for (int n = 0; n < numSteps; n++) {
-           t = t0 + (n*stepSize);
-           variableArgList.get(variableArgList.size()-1).setArgumentValue(t);
+            status++;
+            t = t0 + (n * stepSize);
+            variableArgList.get(variableArgList.size() - 1).setArgumentValue(t);
            // t = Math.ceil(t * 10000) / 10000;
 
             //Let's find k1:
@@ -428,7 +437,7 @@ public final class Methods {
             int row = n + 1;
             //double tablex=row*stepSize;
             //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
-            tableStrings[0] = Double.toString(row*stepSize);
+            tableStrings[0] = Double.toString(row * stepSize);
             for (int col = 0; col < stockArrayList.size(); col++) {
                 tableStrings[col + 1] = Double.toString(argumentList.get(col).getArgumentValue());
             }
@@ -461,11 +470,11 @@ public final class Methods {
         for (int j = 0; j < flowArrayList.size(); j++) {
 
             for (int i = 0; i < stockArgList.size(); i++) {
-                FlowObject flow = flowArrayList.get(j);
+                FlowObject flow = flowArrayList.get(i);
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
                 e = new Expression(flow.getFlowEquation(), globalvariables);
-
+                
                 ret[i] = e.calculate();
 
             }
@@ -474,3 +483,10 @@ public final class Methods {
     }
 
 }
+/* for(int i=0;i<stockArrayList.size();i++){
+    for(int j=0;j<stockArrayList.get(i).getFlows(j).length();j++){
+            e = new Expression(stockArrayList.get(i).getFlows(j),globalvariables);
+            ret[i] = e.calculate();
+        }
+    }
+*/

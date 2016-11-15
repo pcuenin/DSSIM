@@ -36,54 +36,57 @@ import javax.swing.JFrame;
  * @author kamre_000
  */
 public class JSONSave {
-    public JSONObject saveStock(StockObject stock){
+
+    public JSONObject saveStock(StockObject stock) {
         JSONObject stockObj = new JSONObject();
-        stockObj.put("name",stock.getStockName());
-        //stockObj.put("eq","");
-        //stockObj.put("arg",stock.getStockArg());
-        stockObj.put("desc",stock.getStockDescrip());
-        stockObj.put("init",stock.getStockInitial());
-        //stockObj.put("obj",stock.getO_Object());
-        mxCell stockGeo = (mxCell)stock.getO_Object();
+        stockObj.put("name", stock.getStockName());
+        stockObj.put("desc", stock.getStockDescrip());
+        stockObj.put("init", stock.getStockInitial());
+        mxCell stockGeo = (mxCell) stock.getO_Object();
         stockObj.put("x", String.valueOf(stockGeo.getGeometry().getCenterX()));
         stockObj.put("y", String.valueOf(stockGeo.getGeometry().getCenterY()));
+        //stockObj.put("eq",stock.getStockEq());
+
         return stockObj;
     }
-    public JSONObject saveFlow(FlowObject flow){
+
+    public JSONObject saveFlow(FlowObject flow) {
         JSONObject flowObj = new JSONObject();
-        flowObj.put("name",flow.getFlowName());
-        flowObj.put("eq",flow.getFlowEquation());
-        //flowObj.put("obj",flow.getO_Object());
-        mxCell flowGeo = (mxCell)flow.getO_Object();
+        flowObj.put("name", flow.getFlowName());
+        flowObj.put("eq", flow.getFlowEquation());
+        mxCell flowGeo = (mxCell) flow.getO_Object();
         flowObj.put("x", String.valueOf(flowGeo.getGeometry().getCenterX()));
         flowObj.put("y", String.valueOf(flowGeo.getGeometry().getCenterY()));
+        //flowObj.put("to",flow.getFlowTo());
+        //flowObj.put("from",flow.getFlowFrom());
         return flowObj;
     }
-    
-    public JSONObject saveVar(VariableObject var){
+
+    public JSONObject saveVar(VariableObject var) {
         JSONObject varObj = new JSONObject();
-        varObj.put("name",var.getVarName());
-        //varObj.put("arg",var.getVarArg());
-        //varObj.1put("obj",var.getO_Object());
-        varObj.put("desc",var.getVarDescrip());
-        varObj.put("init",var.getVarInitial());
-        mxCell varGeo = (mxCell)var.getO_Object();
+        varObj.put("name", var.getVarName());
+        varObj.put("desc", var.getVarDescrip());
+        varObj.put("init", var.getVarInitial());
+        mxCell varGeo = (mxCell) var.getO_Object();
         varObj.put("x", String.valueOf(varGeo.getGeometry().getCenterX()));
         varObj.put("y", String.valueOf(varGeo.getGeometry().getCenterY()));
+        //varObj.put("eq", var.getVarEq());
         return varObj;
     }
-    
-    public JSONObject saveArrow(ArrowObject arrow){
+
+    public JSONObject saveArrow(ArrowObject arrow) {
         JSONObject arrowObj = new JSONObject();
+        //arrowObj.put("to", arrow.getArrowTo());
+        //arrowObj.put("from", arrow.getArrowFrom());
         return arrowObj;
     }
-    
-    public JSONObject saveSettings(ModelSettings ms){
+
+    public JSONObject saveSettings(ModelSettings ms) {
         JSONObject settings = new JSONObject();
-        settings.put("init",ms.getInitialTime());
-        settings.put("final",ms.getFinalTime());
-        settings.put("timestep",ms.getTimeStep());
+        settings.put("init", ms.getInitialTime());
+        settings.put("final", ms.getFinalTime());
+        settings.put("timestep", ms.getTimeStep());
         return settings;
     }
-        
+
 }

@@ -23,7 +23,6 @@
  */
 package dssim;
 
-
 import static dssim.MainForm.graph;
 import org.json.simple.JSONObject;
 import dssim.gui.FlowObject;
@@ -44,153 +43,134 @@ import org.json.simple.parser.ParseException;
  * @author kamre_000
  */
 public class JSONRead {
-    
-    public static ArrayList<StockObject> readStock(JSONParser parser, File filename){
+
+    public static ArrayList<StockObject> readStock(JSONParser parser, File filename) {
         ArrayList<StockObject> stockArrayList = new ArrayList();
-        
-        try{
-        Object obj = parser.parse(new FileReader(filename));
-        JSONObject jStock = (JSONObject) obj;
-        JSONArray jStockArray = (JSONArray) jStock.get("Stocks");
-        Iterator it = jStockArray.iterator();
-        while(it.hasNext())
-            {
+
+        try {
+            Object obj = parser.parse(new FileReader(filename));
+            JSONObject jStock = (JSONObject) obj;
+            JSONArray jStockArray = (JSONArray) jStock.get("Stocks");
+            Iterator it = jStockArray.iterator();
+            while (it.hasNext()) {
                 JSONObject Stock = (JSONObject) it.next();
                 //String arg = (String) jsonObject.get("arg");
                 String name = (String) Stock.get("name");
                 String desc = (String) Stock.get("desc");
                 String init = (String) Stock.get("init");
                 String x = (String) Stock.get("x");
-                x = x.substring(0,x.length()-2);
+                x = x.substring(0, x.length() - 2);
                 String y = (String) Stock.get("y");
-                y = y.substring(0,y.length()-2);
+                y = y.substring(0, y.length() - 2);
                 //Object jobj = jStock.get("obj");
                 Object parent = graph.getDefaultParent();
-                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x), 
-                Integer.parseInt(y), 100, 50, "Stock");//draw the node
-                StockObject stock = new StockObject(node,name,desc,init,x,y);
+                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x),
+                        Integer.parseInt(y), 100, 50, "Stock");//draw the node
+                StockObject stock = new StockObject(node, name, desc, init, x, y);
                 stockArrayList.add(stock);
             }
-        }
-        catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-        catch(ParseException e){
-            e.printStackTrace();
-        }
-        
+
         return stockArrayList;
     }
-    
-    public static ArrayList<FlowObject> readFlow(JSONParser parser, File filename){
+
+    public static ArrayList<FlowObject> readFlow(JSONParser parser, File filename) {
         ArrayList<FlowObject> flowArrayList = new ArrayList();
-        
-        try{
-        Object obj = parser.parse(new FileReader(filename));
-        JSONObject jFlow = (JSONObject) obj;
-        JSONArray jFlowArray = (JSONArray) jFlow.get("Flows");
-        Iterator it = jFlowArray.iterator();
-        while(it.hasNext())
-            {
+
+        try {
+            Object obj = parser.parse(new FileReader(filename));
+            JSONObject jFlow = (JSONObject) obj;
+            JSONArray jFlowArray = (JSONArray) jFlow.get("Flows");
+            Iterator it = jFlowArray.iterator();
+            while (it.hasNext()) {
                 JSONObject Flow = (JSONObject) it.next();
                 String name = (String) Flow.get("name");
                 String eq = (String) Flow.get("eq");
                 String x = (String) Flow.get("x");
-                x = x.substring(0,x.length()-2);
+                x = x.substring(0, x.length() - 2);
                 String y = (String) Flow.get("y");
-                y = y.substring(0,y.length()-2);
+                y = y.substring(0, y.length() - 2);
                 //Object jobj = jsonObject.get("obj");
                 Object parent = graph.getDefaultParent();
-                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x), 
-                Integer.parseInt(y), 100, 50, "Flow");//draw the node
-                FlowObject flow = new FlowObject(node,name,eq,x,y);
+                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x),
+                        Integer.parseInt(y), 100, 50, "Flow");//draw the node
+                FlowObject flow = new FlowObject(node, name, eq, x, y);
                 flowArrayList.add(flow);
             }
-        }
-        catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-        catch(ParseException e){
-            e.printStackTrace();
-        }
-        
+
         return flowArrayList;
     }
-    
-    public static ArrayList<VariableObject> readVar(JSONParser parser, File filename){
+
+    public static ArrayList<VariableObject> readVar(JSONParser parser, File filename) {
         ArrayList<VariableObject> varArrayList = new ArrayList();
 
-        try{
-        Object obj = parser.parse(new FileReader(filename));
-        JSONObject jVar = (JSONObject) obj;
-        JSONArray jVarArray = (JSONArray) jVar.get("Variables");
-        Iterator it = jVarArray.iterator();
-        while(it.hasNext())
-            {
+        try {
+            Object obj = parser.parse(new FileReader(filename));
+            JSONObject jVar = (JSONObject) obj;
+            JSONArray jVarArray = (JSONArray) jVar.get("Variables");
+            Iterator it = jVarArray.iterator();
+            while (it.hasNext()) {
                 JSONObject Var = (JSONObject) it.next();
                 String name = (String) Var.get("name");
                 String desc = (String) Var.get("desc");
                 String init = (String) Var.get("init");
                 String x = (String) Var.get("x");
-                x = x.substring(0,x.length()-2);
+                x = x.substring(0, x.length() - 2);
                 String y = (String) Var.get("y");
-                y = y.substring(0,y.length()-2);
+                y = y.substring(0, y.length() - 2);
                 //Object jobj = jsonObject.get("obj");
                 Object parent = graph.getDefaultParent();
-                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x), 
-                Integer.parseInt(y), 100, 50, "Variable");//draw the node
-                VariableObject var = new VariableObject(node,name,desc,init,x,y);
+                Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x),
+                        Integer.parseInt(y), 100, 50, "Variable");//draw the node
+                VariableObject var = new VariableObject(node, name, desc, init, x, y);
                 varArrayList.add(var);
             }
-        }
-        catch(FileNotFoundException e){
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
-        catch(IOException e){
-            e.printStackTrace();
-        }
-        catch(ParseException e){
-            e.printStackTrace();
-        }
-        
+
         return varArrayList;
     }
     /*
-    public ArrowObject readArrow(){
-        Object obj = parser.parse(new FileReader(filename));
+     public ArrowObject readArrow(){
+     Object obj = parser.parse(new FileReader(filename));
 
-        JSONObject ms = (JSONObject) obj;
+     JSONObject ms = (JSONObject) obj;
         
-        return arr;
-    }*/
-    public static String[] readSettings(JSONParser parser, File filename){
+     return arr;
+     }*/
+
+    public static String[] readSettings(JSONParser parser, File filename) {
         String[] settings = new String[3];
-        try{
-        Object obj = parser.parse(new FileReader(filename));
-        JSONObject mSettings = (JSONObject) obj;
-        JSONArray msArray = (JSONArray) mSettings.get("Model Settings");
-        Iterator it = msArray.iterator();
-        while(it.hasNext())
-            {
-                JSONObject ms = (JSONObject) it.next();
-                settings[0] = (String) ms.get("init");
-                settings[1] = (String) ms.get("final");
-                settings[2] = (String) ms.get("timestep");
-            }
-        }
-        catch(FileNotFoundException e){
+        try {
+            Object obj = parser.parse(new FileReader(filename));
+            JSONObject mSettings = (JSONObject) obj;
+            JSONObject ms = (JSONObject) mSettings.get("Model Settings");
+            settings[0] = (String) ms.get("init");
+            settings[1] = (String) ms.get("final");
+            settings[2] = (String) ms.get("timestep");
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        catch(ParseException e){
+        } catch (ParseException e) {
             e.printStackTrace();
         }
         return settings;
