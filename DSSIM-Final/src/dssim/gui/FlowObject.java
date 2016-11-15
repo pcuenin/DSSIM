@@ -27,18 +27,18 @@ package dssim.gui;
  *
  * @author paulcuenin
  */
-public class FlowObject extends SuperObject {
+public class FlowObject extends ConnectableModelObject {
 
     private String sFlowName;
     private String sFlowEquation;
     private String x;
     private String y;
     // add from and to super object types
-    SuperObject superObjectTo = null;
-    SuperObject superObjectFrom = null;
+    ConnectableModelObject superObjectTo = null;
+    ConnectableModelObject superObjectFrom = null;
      
 
-    public FlowObject(Object graphobject, String inputname, String inputequation,String sFlowX, String sFlowY) {
+    public FlowObject(Object graphobject, String inputname, String inputequation,ConnectableModelObject from, ConnectableModelObject to) {
 
         //flow name from user
         //sObjName = inputname;
@@ -50,8 +50,15 @@ public class FlowObject extends SuperObject {
         super(inputname, graphobject);
         sFlowEquation = inputequation;
         sFlowName = inputname;
-        x = sFlowX;
-        y = sFlowY;
+        to.addInputObj(this);
+        from.addOutputObj(this); //
+        superObjectTo =to;
+        superObjectFrom=from;
+        
+    }
+    public void removeFlow(){
+        superObjectTo.deleteInputObj(this);
+        superObjectFrom.deleteOutputObj(this);
     }
     public String getFlowX(){
         return x;

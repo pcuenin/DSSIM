@@ -27,13 +27,13 @@ package dssim.gui;
  *
  * @author paulcuenin
  */
-public class SuperObject {
+public class ModelingObject {
 
     private String sObjName; //for keeping the name given from the user
     private Object oObj; //the JGraph object that is created by placing the object
     private String sObjJgraphName; //JGraph object name 
 
-    public SuperObject(String inputname, Object graphobject) {
+    public ModelingObject(String inputname, Object graphobject) {
             sObjName = inputname;
             sObjJgraphName = graphobject.toString();
             oObj = graphobject;

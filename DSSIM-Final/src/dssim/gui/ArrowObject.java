@@ -27,25 +27,28 @@ package dssim.gui;
  *
  * @author paulcuenin
  */
-public class ArrowObject extends SuperObject {
+public class ArrowObject extends ModelingObject {
     
     // add from and to super object types
-    SuperObject superObjectTo = null;
-    SuperObject superObjectFrom = null;
+    ConnectableModelObject superObjectTo = null;
+    ConnectableModelObject superObjectFrom = null;
 
         
         
       
 
-        public ArrowObject(String inputname, Object graphobject) {
-            super(inputname, graphobject);
-
-        }
-        public ArrowObject(String inputname, Object graphobject, SuperObject from,SuperObject to) {
+        
+        public ArrowObject(String inputname, Object graphobject, ConnectableModelObject from,ConnectableModelObject to) {
             super(inputname, graphobject);
             superObjectTo = to;
+            to.addInputObj(this);
+            from.addOutputObj(this);
             superObjectFrom = from;
 
+        }
+        public void removeArrow(){
+            superObjectTo.deleteInputObj(this);
+            superObjectFrom.deleteOutputObj(this);
         }
 
         

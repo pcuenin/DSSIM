@@ -29,7 +29,7 @@ import org.mariuszgromada.math.mxparser.Argument;
  *
  * @author paulcuenin
  */
-public class StockObject extends SuperObject {
+public class StockObject extends ConnectableModelObject {
 
     private String sStockDescrip; //for keeping the user entered symbol
     private String sStockName;

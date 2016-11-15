@@ -29,7 +29,7 @@ import org.mariuszgromada.math.mxparser.Argument;
  *
  * @author paulcuenin
  */
-public class VariableObject extends SuperObject {
+public class VariableObject extends ConnectableModelObject {
 
     private String sVarDesc;
     private String sVarName;

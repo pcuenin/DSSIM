@@ -78,6 +78,7 @@ public class ArrowDialog extends javax.swing.JDialog {
         jButtonSave = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Arrow Information");
 
         jLabel1.setText("Arrow Name");
 
