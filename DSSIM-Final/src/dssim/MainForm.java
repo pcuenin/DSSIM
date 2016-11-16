@@ -93,10 +93,11 @@ public class MainForm extends javax.swing.JFrame {
     String inputinitial;
     String inputequation;
     String inputValue;
-    static final String STOCK_STYLE = "Stock";
-    static final String VARIABLE_STYLE = "Variable";
-    static final String ARROW_STYLE = "Arrow";
-    static final String FLOW_STYLE = "Flow";
+    public static final String STOCK_STYLE = "Stock";
+    public static final String VARIABLE_STYLE = "Variable";
+    public static final String ARROW_STYLE = "Arrow";
+    public static final String FLOW_STYLE = "Flow";
+    public static final String FLOWPOOL_STYLE = "FlowPool";
 
     MouseEvent last = null;
     boolean isFirstClickArrow = true;
@@ -110,6 +111,8 @@ public class MainForm extends javax.swing.JFrame {
     public ArrayList<FlowObject> flowArrayList = new ArrayList<FlowObject>();
     public ArrayList<VariableObject> variableArrayList = new ArrayList<VariableObject>();
     public ArrayList<ArrowObject> arrowArrayList = new ArrayList<ArrowObject>();
+    public ArrayList<ConnectableModelObject> flowPoolArrayList = new ArrayList<ConnectableModelObject>();
+
 
     //Creates new form MainForm
     public MainForm() {
@@ -350,6 +353,18 @@ public class MainForm extends javax.swing.JFrame {
 
         return null;
     }
+    
+    ConnectableModelObject getFlowPool(mxCell mxc){
+        ConnectableModelObject cmo;
+        for (int i = 0; i < flowPoolArrayList.size(); i++) {
+            cmo = flowPoolArrayList.get(i);
+            if (cmo.getO_Object() == mxc) {
+                return cmo;
+            }
+        }
+
+        return null;
+    }
 
     // get stock flow from mxCell
     FlowObject getFlow(mxCell mxc) {
@@ -401,6 +416,7 @@ public class MainForm extends javax.swing.JFrame {
 
             Object node = graph.insertVertex(parent, null, inputName, x, y, 100, 50, styleName);//draw the node
             ConnectableModelObject cmo = new ConnectableModelObject(inputName, node); // need to do something with this
+            flowPoolArrayList.add(cmo);
             //FlowPoolObject flowpoolobject = new FlowPoolObject(node, inputName, x + "", y + "");
             //FlowPoolArrayList.add(flowpoolobject);
             /*VariableObject variableobject = new VariableObject(node, inputName,
@@ -478,6 +494,8 @@ public class MainForm extends javax.swing.JFrame {
             return this.getVar(mxobj);
         } else if (objst.equals(MainForm.STOCK_STYLE)) {
             return this.getStock(mxobj);
+        } else if (objst.equals(MainForm.FLOWPOOL_STYLE)){
+            return this.getFlowPool(mxobj);
         }
         return null;
 

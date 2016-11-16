@@ -23,6 +23,9 @@
  */
 package dssim.gui;
 
+import com.mxgraph.model.mxCell;
+import dssim.MainForm;
+
 /**
  *
  * @author paulcuenin
@@ -32,6 +35,14 @@ public class ModelingObject {
     private String sObjName; //for keeping the name given from the user
     private Object oObj; //the JGraph object that is created by placing the object
     private String sObjJgraphName; //JGraph object name 
+    
+    final static int INVALID = -1;
+    final static int FLOW = 0;
+    final static int ARROW = 1;
+    final static int STOCK = 2;
+    final static int VARIABLE = 3;
+    final static int FLOWPOOL = 4;
+    
 
     public ModelingObject(String inputname, Object graphobject) {
             sObjName = inputname;
@@ -57,6 +68,24 @@ public class ModelingObject {
 
     public Object getO_Object() {
         return oObj;
+    }
+    
+    public int getStyle(){
+        
+        mxCell mxobj = (mxCell) getO_Object();// cast generic object to be a mxCell
+        
+        
+        switch((String) mxobj.getStyle())  // mull the mxCell id to use
+        {
+            case MainForm.FLOW_STYLE: return FLOW;
+            case MainForm.ARROW_STYLE: return ARROW;
+            case MainForm.STOCK_STYLE: return STOCK;
+            case MainForm.FLOWPOOL_STYLE: return FLOWPOOL;
+            case MainForm.VARIABLE_STYLE: return VARIABLE;
+            default: return INVALID;
+            
+        }
+        
     }
 
 }
