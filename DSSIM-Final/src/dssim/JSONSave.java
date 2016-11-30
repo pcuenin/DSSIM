@@ -26,10 +26,10 @@ package dssim;
 import com.mxgraph.model.mxCell;
 import com.orsoncharts.util.json.JSONObject;
 import dssim.gui.ArrowObject;
+import dssim.gui.ConnectableModelObject;
 import dssim.gui.FlowObject;
 import dssim.gui.StockObject;
 import dssim.gui.VariableObject;
-import javax.swing.JFrame;
 
 /**
  *
@@ -54,11 +54,10 @@ public class JSONSave {
         JSONObject flowObj = new JSONObject();
         flowObj.put("name", flow.getFlowName());
         flowObj.put("eq", flow.getFlowEquation());
-        mxCell flowGeo = (mxCell) flow.getO_Object();
-        flowObj.put("x", String.valueOf(flowGeo.getGeometry().getCenterX()));
-        flowObj.put("y", String.valueOf(flowGeo.getGeometry().getCenterY()));
-        //flowObj.put("to",flow.getFlowTo());
-        //flowObj.put("from",flow.getFlowFrom());
+        flowObj.put("to",flow.getFlowTo().getCMOName());
+        flowObj.put("from",flow.getFlowFrom().getCMOName());
+        flowObj.put("toStyle",Integer.toString(flow.getFlowTo().getStyle()));
+        flowObj.put("fromStyle",Integer.toString(flow.getFlowFrom().getStyle()));
         return flowObj;
     }
 
@@ -76,9 +75,22 @@ public class JSONSave {
 
     public JSONObject saveArrow(ArrowObject arrow) {
         JSONObject arrowObj = new JSONObject();
-        //arrowObj.put("to", arrow.getArrowTo());
-        //arrowObj.put("from", arrow.getArrowFrom());
+        arrowObj.put("name", arrow.getArrowName());
+        arrowObj.put("to", arrow.getArrowTo().getCMOName());
+        arrowObj.put("from", arrow.getArrowFrom().getCMOName());
+        arrowObj.put("toStyle", Integer.toString(arrow.getArrowTo().getStyle()));
+        arrowObj.put("fromStyle", Integer.toString(arrow.getArrowFrom().getStyle()));
         return arrowObj;
+    }
+    
+    public JSONObject saveFlowPool(ConnectableModelObject flowPool)
+    {
+        JSONObject fpObj = new JSONObject();
+        mxCell fpGeo = (mxCell) flowPool.getO_Object();
+        fpObj.put("x", String.valueOf(fpGeo.getGeometry().getCenterX()));
+        fpObj.put("y", String.valueOf(fpGeo.getGeometry().getCenterY()));
+        fpObj.put("name", flowPool.getCMOName());
+        return fpObj;
     }
 
     public JSONObject saveSettings(ModelSettings ms) {

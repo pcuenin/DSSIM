@@ -33,9 +33,15 @@ public class ConnectableModelObject extends ModelingObject {
     
     private Vector<ModelingObject> vInputs = new Vector<ModelingObject>();
     private Vector<ModelingObject> vOutputs= new Vector<ModelingObject>();
+    private String CMOName;
 
     public ConnectableModelObject(String inputname, Object graphobject) {
         super(inputname, graphobject);
+        CMOName = inputname;
+    }
+    
+    public String getCMOName(){
+       return CMOName; 
     }
     
     public void addInputObj(ModelingObject moob){
