@@ -100,10 +100,10 @@ public class JSONRead {
                 Object parent = graph.getDefaultParent();
                 Object node = graph.insertVertex(parent, null, name, Integer.parseInt(x),
                         Integer.parseInt(y), 100, 50, "Flow");//draw the node
-                
+
                 //Flow object no longer has x and y, it is a from and to
-              //  FlowObject flow = new FlowObject(node, name, eq, from, to);
-               // flowArrayList.add(flow);
+                //  FlowObject flow = new FlowObject(node, name, eq, from, to);
+                // flowArrayList.add(flow);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();

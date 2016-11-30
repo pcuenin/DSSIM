@@ -56,7 +56,7 @@ public class ProgressBar extends javax.swing.JPanel implements ActionListener, P
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
     }
-    
+
     public boolean isFrameAvailable() {
         return frame != null;
     }
@@ -68,7 +68,6 @@ public class ProgressBar extends javax.swing.JPanel implements ActionListener, P
     public JFrame getFrame() {
         return frame;
     }
-    
 
     public void actionPerformed(ActionEvent evt) {
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

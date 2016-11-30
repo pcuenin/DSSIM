@@ -23,6 +23,9 @@
  */
 package dssim.gui;
 
+import com.mxgraph.view.mxGraph;
+import dssim.MainForm;
+
 /**
  *
  * @author paulcuenin
@@ -40,13 +43,7 @@ public class FlowObject extends ConnectableModelObject {
 
     public FlowObject(Object graphobject, String inputname, String inputequation,ConnectableModelObject from, ConnectableModelObject to) {
 
-        //flow name from user
-        //sObjName = inputname;
-        //jgraph object cell name
-        //sObjJgraphName = graphobject.toString();
-        //object given from jgraph
-        //oObj = graphobject;
-        //input equation from user. for rhs data building later
+        
         super(inputname, graphobject);
         sFlowEquation = inputequation;
         sFlowName = inputname;
@@ -81,4 +78,18 @@ public class FlowObject extends ConnectableModelObject {
     public void setFlowEquation(String newequation) {
         sFlowEquation = newequation;
     }
+    public ConnectableModelObject getToObject(){
+        return superObjectTo;
+    }
+    public ConnectableModelObject getFromObject(){
+        return superObjectFrom;
+    }
+    public ModelingObject getFlowPoolConnected(mxGraph graph){
+        if(superObjectTo.getStyle()==ModelingObject.FLOWPOOL){
+           
+               return superObjectTo;
+        } else if (this.superObjectFrom.getStyle()==ModelingObject.FLOWPOOL){
+            return this.superObjectFrom;
+        } else return null;
+    }    
 }

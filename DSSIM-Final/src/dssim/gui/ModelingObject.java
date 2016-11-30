@@ -36,12 +36,12 @@ public class ModelingObject {
     private Object oObj; //the JGraph object that is created by placing the object
     private String sObjJgraphName; //JGraph object name 
     
-    final static int INVALID = -1;
-    final static int FLOW = 0;
-    final static int ARROW = 1;
-    final static int STOCK = 2;
-    final static int VARIABLE = 3;
-    final static int FLOWPOOL = 4;
+    public final static int INVALID = -1;
+    public final static int FLOW = 0;
+    public final static int ARROW = 1;
+    public final static int STOCK = 2;
+    public final static int VARIABLE = 3;
+    public final static int FLOWPOOL = 4;
     
 
     public ModelingObject(String inputname, Object graphobject) {

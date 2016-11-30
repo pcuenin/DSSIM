@@ -23,7 +23,6 @@ package dssim;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /**
  *
  * @author Lander University
@@ -47,13 +46,13 @@ import javax.swing.table.DefaultTableModel;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author TJ
  */
 public class Table {
-    public Table (DefaultTableModel tableModel){
+
+    public Table(DefaultTableModel tableModel) {
         final JFrame tableFrame = new JFrame("Table");
         tableFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //Create and set up the content pane.
@@ -64,7 +63,7 @@ public class Table {
         tableFrame.setContentPane(scrollPane);
 
         //make a menue bar with options
-        JMenuBar menuBar = new JMenuBar();  
+        JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
         JMenuItem exitAction = new JMenuItem("Exit");
@@ -76,57 +75,57 @@ public class Table {
         tableFrame.setJMenuBar(menuBar);
 
         //exit action
-    exitAction.addActionListener(new ActionListener() {
-    public void actionPerformed(ActionEvent arg0) {
-        tableFrame.setVisible(false);
-        tableFrame.dispose();
-    }
-});
-    //save action using file saver
-    saveAction.addActionListener(new ActionListener() {
-    public void actionPerformed(ActionEvent arg0) {
-        JFileChooser fc = new JFileChooser();
-        JFrame frame = new JFrame("Save");
-        int userSelection = fc.showSaveDialog(frame);
-        if (userSelection == JFileChooser.APPROVE_OPTION) {
-            File fileToSave = fc.getSelectedFile();
-            //System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-            File file = new File(fileToSave.getAbsolutePath());
-            try{
-                if(!file.exists()){
-                    file.createNewFile();
-                }
-                FileWriter fw = new FileWriter(file.getAbsoluteFile());
-                BufferedWriter bw = new BufferedWriter(fw);
-                for(int i = 0; i < table.getRowCount(); i++){ 
-                    for(int j = 0; j < table.getColumnCount(); j++){ 
-                        bw.write(table.getModel().getValueAt(i, j)+" ");
-                    }
-                    bw.newLine();
-                }
-                bw.close();
-                fw.close();
-            }catch(Exception ex){
-                ex.printStackTrace();
+        exitAction.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                tableFrame.setVisible(false);
+                tableFrame.dispose();
             }
-        }
+        });
+        //save action using file saver
+        saveAction.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                JFileChooser fc = new JFileChooser();
+                JFrame frame = new JFrame("Save");
+                int userSelection = fc.showSaveDialog(frame);
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File fileToSave = fc.getSelectedFile();
+                    //System.out.println("Save as file: " + fileToSave.getAbsolutePath());
+                    File file = new File(fileToSave.getAbsolutePath());
+                    try {
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                        FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                        BufferedWriter bw = new BufferedWriter(fw);
+                        for (int i = 0; i < table.getRowCount(); i++) {
+                            for (int j = 0; j < table.getColumnCount(); j++) {
+                                bw.write(table.getModel().getValueAt(i, j) + " ");
+                            }
+                            bw.newLine();
+                        }
+                        bw.close();
+                        fw.close();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+        });
+        //print action
+        printAction.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    table.print();
+                } catch (Exception pe) {
+                    System.err.println("Error printing: " + pe.getMessage());
+                }
+            }
+        });
+        //show the table
+        tableFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        tableFrame.pack();
+        tableFrame.setVisible(true);
     }
 
-    });
-    //print action
-    printAction.addActionListener(new ActionListener() {
-    public void actionPerformed(ActionEvent arg0) {
-        try {
-        table.print();
-      } catch (Exception pe) {
-        System.err.println("Error printing: " + pe.getMessage());
-      }
-    }
-});
-    //show the table
-    tableFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-    tableFrame.pack();
-    tableFrame.setVisible(true);
-    }
-    
 }

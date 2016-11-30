@@ -66,7 +66,6 @@ public class ModelSettings extends javax.swing.JPanel {
     }
 
     //Returns the text from the inital time text field to the MainForm
-
     public String getInitialTime() {
         return initialTime;
     }
@@ -76,13 +75,11 @@ public class ModelSettings extends javax.swing.JPanel {
     }
 
     //Returns the text from the final time text field to the MainForm
-
     public String getFinalTime() {
         return finalTime;
     }
 
     //Returns the text from the time step text field to the MainForm
-
     public void setTimeStep(String init) {
         initialTime = init;
     }

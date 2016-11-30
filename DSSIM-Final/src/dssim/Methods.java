@@ -41,15 +41,17 @@ public final class Methods {
 
     //this data type is from the jfreechart library
     public XYSeriesCollection data;
-    
+
     //as well as this one, this one allows an x y type table setup
     public DefaultTableModel tableModel = new DefaultTableModel();
     //these array lists are instantiated here to be used as global values to be passed to the mainform
     public ArrayList<Argument> argumentList = new ArrayList<Argument>();
     public ArrayList<Argument> variableArgList = new ArrayList<Argument>();
     public ArrayList<Double> y0 = new ArrayList<Double>();
-    public int status=0;
+    public int status = 0;
+
     //public javax.swing.JProgressBar pbar= getProgressBar();
+
     public Methods() {
         // what is this doing? -PMC
     }
@@ -107,9 +109,8 @@ public final class Methods {
         }
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
-        
+
         //javax.swing.JProgressBar progress = new javax.swing.JProgressBar(0,numSteps);
-        
         //int cutoff = String.valueOf(t).length()-1;
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
@@ -474,7 +475,7 @@ public final class Methods {
                 //Think about having general expressions passed to this loop, if you
                 //can actually change parts of the expressions using e.whatever
                 e = new Expression(flow.getFlowEquation(), globalvariables);
-                
+
                 ret[i] = e.calculate();
 
             }
@@ -484,9 +485,9 @@ public final class Methods {
 
 }
 /* for(int i=0;i<stockArrayList.size();i++){
-    for(int j=0;j<stockArrayList.get(i).getFlows(j).length();j++){
-            e = new Expression(stockArrayList.get(i).getFlows(j),globalvariables);
-            ret[i] = e.calculate();
-        }
-    }
-*/
+ for(int j=0;j<stockArrayList.get(i).getFlows(j).length();j++){
+ e = new Expression(stockArrayList.get(i).getFlows(j),globalvariables);
+ ret[i] = e.calculate();
+ }
+ }
+ */
