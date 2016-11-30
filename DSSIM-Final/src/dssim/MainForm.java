@@ -71,7 +71,7 @@ import java.util.Vector;
 
 public class MainForm extends javax.swing.JFrame {
 
-    private mxGraphComponent graphComponent;
+    private static mxGraphComponent graphComponent;
     protected static mxGraph graph = new mxGraph();
     private Object cell;
     int objectLoc = -1;
@@ -88,6 +88,7 @@ public class MainForm extends javax.swing.JFrame {
     ModelSettings modelSettings = new ModelSettings();
     ProgressBar progressBar = new ProgressBar();
 
+    boolean runnable = false;
     String inputname;
     String inputdescrip;
     String inputinitial;
@@ -275,6 +276,10 @@ public class MainForm extends javax.swing.JFrame {
         graph.getStylesheet()
                 .putCellStyle("FlowPool", stylelist.getFlowPool());
     }
+    
+    public static mxGraphComponent getGraphComponent(){
+        return graphComponent;
+    }
 
     // paul added this PMC 9-27-16
     public void CustomCursor() {
@@ -305,6 +310,8 @@ public class MainForm extends javax.swing.JFrame {
         graph.getModel().endUpdate();
         StockObject stockobject = new StockObject(node, name, inputsymbol, inputinitial, x + "", y + "");
         stockArrayList.add(stockobject);
+        runnable = true;
+        runSimBtn.enable(runnable);
     }
 
     // This method will add a stock to the graph from a save file
@@ -325,9 +332,7 @@ public class MainForm extends javax.swing.JFrame {
          stock.getStockInitial(),stock.getStockX(),stock.getStockY());
          stockArrayList.add(stockobject);*/
     }
-// This method will add a flow to the graph from the user input
 
-// This method will add a flow to the graph
     // get arrow object from mxCell
     ArrowObject getArrow(mxCell mxc) {
         ArrowObject ao;
@@ -392,23 +397,13 @@ public class MainForm extends javax.swing.JFrame {
         return null;
     }
 
-    /* void AddFlow(FlowObject flow) {
-     //Object parent = graph.getDefaultParent();
-     graphComponent.setConnectable(false);
-     graph.setCellsBendable(false);
-     graph.setCellsCloneable(false);
-     graph.getModel().beginUpdate();
-     graph.getModel().endUpdate();
-
-     }*/
-// This method will add a right pointing arrow to the graph
     void AddFlowPool(int x, int y) {
 
         Object parent = graph.getDefaultParent();
         graphComponent.setConnectable(true);
         graph.setCellsCloneable(false);
         graph.setCellsBendable(false);
-        String inputName = "flowpool";
+        String inputName = "flowpool"+flowPoolArrayList.size();
         String styleName = "FlowPool";
 
         graph.getModel().beginUpdate();
@@ -454,33 +449,18 @@ public class MainForm extends javax.swing.JFrame {
             graph.getModel().endUpdate();
         }
 
-        /*
-         try {
-         //flowObject is added to the flowArrayList
-         Object node = graph.insertVertex(parent, null, name, x, y, 100, 50, styleName);//draw the node
-         FlowObject flowobject = new FlowObject(node, inputname, inputequation, x + "", y + "");
-         flowArrayList.add(flowobject);
-            
-
-         mxCell flow = (mxCell) node;
-         flow.getGeometry().getCenterX(); // how to pull x value PMC 093016
-
-         } finally {
-         graph.getModel().endUpdate();
-         }*/
     }
-// This method will add a flow to the graph from a save file
+    
+    void AddFlowEdge(FlowObject flow) {
+        graph.getModel().beginUpdate();
+            graph.getModel().endUpdate();
+    }
+     void AddArrowEdge(ArrowObject arrow) {
+        graph.getModel().beginUpdate();
+            graph.getModel().endUpdate();
+    }
+    
 
-    /*void AddFlow(FlowObject flow) {
-     //Object parent = graph.getDefaultParent();
-     graphComponent.setConnectable(false);
-     graph.setCellsBendable(false);
-     graph.setCellsCloneable(false);
-     graph.getModel().beginUpdate();
-     graph.getModel().endUpdate();
-
-     }*/
-// This method will add a right pointing arrow to the graph
     ModelingObject getModelObject(Object obj) {
         // find which object it in the list
 
@@ -934,12 +914,12 @@ public class MainForm extends javax.swing.JFrame {
             if (retrival == JFileChooser.APPROVE_OPTION) {
                 FileWriter fileWriter = new FileWriter(chooser.getSelectedFile() + ".dsm");
 
-                int returnVal = fc.showSaveDialog(MainForm.this);
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                //int returnVal = fc.showSaveDialog(MainForm.this);
+                //if (returnVal == JFileChooser.APPROVE_OPTION) {
                     try {
 
                         // Writing to a file  
-                        
+                        fileWriter.write("{ \n");
                         fileWriter.write("\"Stocks\" : \n");
                         System.out.println("Writing JSON objects to file");
                         System.out.println("-----------------------");
@@ -952,28 +932,47 @@ public class MainForm extends javax.swing.JFrame {
                         fileWriter.write("\n");
                         fileWriter.write("\"Flows\" : \n");
                         fileWriter.flush();
+                        
                         JSONArray flowList = new JSONArray();
                         for (int i = 0; i < flowArrayList.size(); i++) {
                             JSONObject flowObj = savefile.saveFlow(flowArrayList.get(i));
                             flowList.add(flowObj);
                         }
-
                         fileWriter.write(flowList.toJSONString() + ", \n");
                         fileWriter.write("\n");
                         fileWriter.write("\"Variables\" : \n");
                         fileWriter.flush();
+                        
                         JSONArray varList = new JSONArray();
                         for (int i = 0; i < variableArrayList.size(); i++) {
                             JSONObject varObj = savefile.saveVar(variableArrayList.get(i));
                             varList.add(varObj);
                         }
-                        fileWriter.write(varList.toJSONString() + "\n");
+                        fileWriter.write(varList.toJSONString() + ", \n");
+                        fileWriter.write("\n");
+                        fileWriter.write("\"Arrows\" : \n");
                         fileWriter.flush();
+                        
+                        JSONArray arrowList = new JSONArray();
                         for (int i = 0; i < arrowArrayList.size(); i++) {
-
+                            JSONObject arrowObj = savefile.saveArrow(arrowArrayList.get(i));
+                            arrowList.add(arrowObj);
                         }
+                        fileWriter.write(arrowList.toJSONString() + ", \n");
+                        fileWriter.write("\n");
+                        fileWriter.write("\"Flow Pools\" : \n");
+                        fileWriter.flush();
+                        
+                        JSONArray fpList = new JSONArray();
+                        for (int i = 0; i < flowPoolArrayList.size(); i++) {
+                            JSONObject fpObj = savefile.saveFlowPool(flowPoolArrayList.get(i));
+                            fpList.add(fpObj);
+                        }
+                        fileWriter.write(fpList.toJSONString() + ", \n");
                         fileWriter.write("\n");
                         fileWriter.write("\"Model Settings\" : \n");
+                        fileWriter.flush();
+
                         JSONObject settings = savefile.saveSettings(modelSettings);
                         fileWriter.write(settings.toJSONString() + ", \n");
                         fileWriter.write("}");
@@ -983,7 +982,7 @@ public class MainForm extends javax.swing.JFrame {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                }
+               // }
 
             }
             
@@ -1627,17 +1626,71 @@ public class MainForm extends javax.swing.JFrame {
         for (int i = 0; i < stockArrayList.size(); i++) {
             AddStock(stockArrayList.get(i));
         }
-        flowArrayList = JSONRead.readFlow(parser, srcFile);
-        for (int i = 0; i < flowArrayList.size(); i++) {
-
-            //AddFlow(flowArrayList.get(i));
-            //AddFlowEdge(flowArrayList.get(i));
-        }
+        
         variableArrayList = JSONRead.readVar(parser, srcFile);
         for (int i = 0; i < variableArrayList.size(); i++) {
             AddVariable(variableArrayList.get(i));
         }
+        
+        flowPoolArrayList = new ArrayList<ConnectableModelObject>();
+        ArrayList<String> tempFlowPoolArrayList = JSONRead.readFlowPool(parser, srcFile);
+        for (int i = 0; i < tempFlowPoolArrayList.size(); i++) {
+            String[] tempX = tempFlowPoolArrayList.get(i).split(":");
+            int fpX = Integer.valueOf(tempX[0]);
+            int fpY = Integer.valueOf(tempX[1]);
+            AddFlowPool(fpX,fpY);
+        }
 
+        flowArrayList = JSONRead.readFlow(parser, srcFile, stockArrayList, variableArrayList, flowPoolArrayList);
+        for (int i = 0; i < flowArrayList.size(); i++) {
+            //AddFlowEdge(flowArrayList.get(i).getFlowName(),FLOW_STYLE,flowArrayList.get(i).getFlowFrom(),flowArrayList.get(i).getFlowTo());
+            AddFlowEdge(flowArrayList.get(i));
+        }
+        
+        ArrayList<String[]> tempArrows = JSONRead.readArrow(parser, srcFile, stockArrayList, variableArrayList, flowPoolArrayList);
+        for (int j = 0; j < tempArrows.size(); j++) {
+            Object tempFrom =null,tempTo=null;
+            //AddArrowEdge(ARROW_STYLE,arrowArrayList.get(i).getArrowFrom(),arrowArrayList.get(i).getArrowTo());
+                if(Integer.valueOf(tempArrows.get(j)[4])==2){
+                   for(int i = 0; i<stockArrayList.size(); i++){
+                       if(tempArrows.get(j)[1].equals(stockArrayList.get(i).getStockName()))
+                          tempFrom=graphComponent.getCellAt(Integer.valueOf(stockArrayList.get(i).getStockX()),Integer.valueOf(stockArrayList.get(i).getStockY()));
+                   } 
+                }
+                else if(Integer.valueOf(tempArrows.get(j)[4])==3){
+                    for(int i = 0; i<variableArrayList.size(); i++){
+                       if(tempArrows.get(j)[1].equals(variableArrayList.get(i).getVarName()))
+                          tempFrom=graphComponent.getCellAt(Integer.valueOf(variableArrayList.get(i).getVarX()),Integer.valueOf(variableArrayList.get(i).getVarY()));
+                   } 
+                }
+                else{
+                     for(int i = 0; i<flowArrayList.size(); i++){
+                       if(tempArrows.get(j)[1].equals(flowArrayList.get(i).getFlowName()))
+                          tempFrom=flowArrayList.get(i).getO_Object();
+                   } 
+                }
+                
+                if(Integer.valueOf(tempArrows.get(j)[3])==2){
+                   for(int i = 0; i<stockArrayList.size(); i++){
+                       if(tempArrows.get(j)[2].equals(stockArrayList.get(i).getStockName()))
+                          tempTo=graphComponent.getCellAt(Integer.valueOf(stockArrayList.get(i).getStockX()),Integer.valueOf(stockArrayList.get(i).getStockY()));
+                   } 
+                }
+                else if(Integer.valueOf(tempArrows.get(j)[3])==3){
+                    for(int i = 0; i<variableArrayList.size(); i++){
+                       if(tempArrows.get(j)[2].equals(variableArrayList.get(i).getVarName()))
+                          tempTo=graphComponent.getCellAt(Integer.valueOf(variableArrayList.get(i).getVarX()),Integer.valueOf(variableArrayList.get(i).getVarY()));
+                   } 
+                }
+                else{
+                       for(int i = 0; i<flowArrayList.size(); i++){
+                       if(tempArrows.get(j)[2].equals(flowArrayList.get(i).getFlowName()))
+                          tempTo=flowArrayList.get(i).getO_Object();
+                   } 
+                }
+            AddArrowEdge("Arrow",tempFrom,tempTo);
+        }
+       
         if (!modelSettings.isFrameAvailable()) {
             JFrame jf = new JFrame();
             jf.add(modelSettings);

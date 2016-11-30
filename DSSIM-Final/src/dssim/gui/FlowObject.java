@@ -31,8 +31,6 @@ public class FlowObject extends ConnectableModelObject {
 
     private String sFlowName;
     private String sFlowEquation;
-    private String x;
-    private String y;
     // add from and to super object types
     ConnectableModelObject superObjectTo = null;
     ConnectableModelObject superObjectFrom = null;
@@ -60,11 +58,11 @@ public class FlowObject extends ConnectableModelObject {
         superObjectTo.deleteInputObj(this);
         superObjectFrom.deleteOutputObj(this);
     }
-    public String getFlowX(){
-        return x;
+    public ConnectableModelObject getFlowFrom(){
+        return superObjectFrom;
     }
-    public String getFlowY(){
-        return y;
+    public ConnectableModelObject getFlowTo(){
+        return superObjectTo;
     }
 
     //for use later by gui
