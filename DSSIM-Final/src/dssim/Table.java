@@ -90,16 +90,17 @@ public class Table {
                 if (userSelection == JFileChooser.APPROVE_OPTION) {
                     File fileToSave = fc.getSelectedFile();
                     //System.out.println("Save as file: " + fileToSave.getAbsolutePath());
-                    File file = new File(fileToSave.getAbsolutePath());
+                    File file = new File(fileToSave.getAbsolutePath() + ".csv");
                     try {
                         if (!file.exists()) {
                             file.createNewFile();
                         }
                         FileWriter fw = new FileWriter(file.getAbsoluteFile());
+                        
                         BufferedWriter bw = new BufferedWriter(fw);
                         for (int i = 0; i < table.getRowCount(); i++) {
                             for (int j = 0; j < table.getColumnCount(); j++) {
-                                bw.write(table.getModel().getValueAt(i, j) + " ");
+                                bw.write(table.getModel().getValueAt(i, j) + ",");
                             }
                             bw.newLine();
                         }

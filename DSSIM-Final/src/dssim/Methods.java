@@ -51,7 +51,6 @@ public final class Methods {
     public ArrayList<Argument> variableArgList = new ArrayList<Argument>();
     public ArrayList<Double> y0 = new ArrayList<Double>();
 
-
     //public javax.swing.JProgressBar pbar= getProgressBar();
 
     public Methods() {
@@ -112,13 +111,12 @@ public final class Methods {
         int numSteps = (int) ((tF - t0) / stepSize);
         double t = t0;
 
-        //javax.swing.JProgressBar progress = new javax.swing.JProgressBar(0,numSteps);
-        //int cutoff = String.valueOf(t).length()-1;
+        //int cutoff = String.valueOf(stepSize).length();
         ArrayList<Argument> aTempArgArrayList = new ArrayList<Argument>();
         for (int j = 0; j < aVarList.length; j++) {
             aTempArgArrayList.add(aTempVarList[j]);
         }
-        //
+        
         double[] dydt = new double[argumentList.size()];
 
         ArrayList<Double> k1 = new ArrayList<Double>();
@@ -171,7 +169,6 @@ public final class Methods {
         for (int n = 0; n < numSteps; n++) {
          
             t = t0 + (n * stepSize);
-
             //t = Math.floor(t * Math.pow(10,cutoff)) / Math.pow(10,cutoff);
             variableArgList.get(variableArgList.size() - 1).setArgumentValue(t);
             //Let's find k1:
@@ -227,6 +224,9 @@ public final class Methods {
             int row = n + 1;
             //double tablex=row*stepSize;
             //tableStrings[0] = Double.toString(Math.floor(tablex*Math.pow(10,cutoff))/Math.pow(10,cutoff));
+            //BigDecimal tablet = new BigDecimal(row*stepSize);
+            //String tabletime = tablet.setScale(cutoff, RoundingMode.CEILING).toString();
+            //tableStrings[0] = tabletime.substring(0, tabletime.length()-2);
             tableStrings[0] = Double.toString(row * stepSize);
             for (int col = 0; col < stockArrayList.size(); col++) {
                 //tableStrings[col + 1] = Double.toString(Math.floor(argumentList.get(col).getArgumentValue()* Math.pow(10,cutoff)) / Math.pow(10,cutoff));
@@ -468,7 +468,18 @@ public final class Methods {
         Argument[] globalvariables = globalArgList.toArray(new Argument[globalArgList.size()]);
 
         Expression e;
-    
+        //for how ever many stocks there are, you get each stock and find the solution to each equation from the stock using
+        // the variables array. it then returns that to the double ret array at the appropriate index
+
+        /*for (int i = 0; i < stockArgList.size(); i++) {
+                //Think about having general expressions passed to this loop, if you
+            //can actually change parts of the expressions using e.whatever
+            e = new Expression(flow.getFlowEquation(), globalvariables);
+
+            ret[i] = e.calculate();
+
+        }*/
+        
         for (int i = 0; i < stockArgList.size(); i++) {
             StockObject stock = stockArrayList.get(i);
             Vector<ModelingObject> inputs = stock.getInputs();
@@ -495,4 +506,10 @@ public final class Methods {
     }
 
 }
-
+/* for(int i=0;i<stockArrayList.size();i++){
+ for(int j=0;j<stockArrayList.get(i).getFlows(j).length();j++){
+ e = new Expression(stockArrayList.get(i).getFlows(j),globalvariables);
+ ret[i] = e.calculate();
+ }
+ }
+ */
