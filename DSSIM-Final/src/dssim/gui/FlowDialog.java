@@ -49,15 +49,17 @@ public class FlowDialog extends javax.swing.JDialog {
         jTextFieldFlowName.setText(foFlow.getFlowName());
         jTextFieldFlowEquat1.setText(foFlow.getFlowEquation());
         String variableText = "";
-        
+
         for (VariableObject valocArr1 : valocArr) {
-            
+
             String vs = valocArr1.getObjName();
-            variableText=variableText  +" " +  vs + ",";
+            variableText = variableText + " " + vs + ",";
         }
-        StringBuilder nameBuilder = new StringBuilder(variableText);
-        nameBuilder.deleteCharAt(nameBuilder.length() - 1);
-        jTextFieldFlowVariables2.setText(nameBuilder.toString());
+        if (variableText.length() > 1) {
+            StringBuilder nameBuilder = new StringBuilder(variableText);
+            nameBuilder.deleteCharAt(nameBuilder.length() - 1);
+            jTextFieldFlowVariables2.setText(nameBuilder.toString());
+        }
 
         if (foFlow.superObjectFrom != null && foFlow.superObjectTo != null) {
             this.jTextFieldFlowFrom.setText(foFlow.superObjectFrom.getObjName());
