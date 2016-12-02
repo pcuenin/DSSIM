@@ -48,7 +48,6 @@ public class StockDialog extends javax.swing.JDialog {
         updateComponents();
     }
 
-    
     public void updateComponents() {
         jTextFieldStockName.setText(soStock.getObjName());
         jTextFieldStockDesc.setText(soStock.getStockDescrip());
@@ -57,18 +56,18 @@ public class StockDialog extends javax.swing.JDialog {
         // find flow equations and pull their equation to text
         String equations = "";
         for (ModelingObject mobj : inputs) {
-            if(mobj.getStyle()==ModelingObject.FLOW){ // check if the incoming is flow
-                FlowObject fobj=(FlowObject)mobj;
-                equations+=fobj.getFlowEquation();// if it is flow then add the equation
+            if (mobj.getStyle() == ModelingObject.FLOW) { // check if the incoming is flow
+                FlowObject fobj = (FlowObject) mobj;
+                equations += fobj.getFlowEquation();// if it is flow then add the equation
             }
-        
+
         }
         for (ModelingObject mobj : outputs) {
-            if(mobj.getStyle()==ModelingObject.FLOW){ // check if the incoming is flow
-                FlowObject fobj=(FlowObject)mobj;
-                equations+= "-"+fobj.getFlowEquation();// if it is flow th  en add the equation
+            if (mobj.getStyle() == ModelingObject.FLOW) { // check if the incoming is flow
+                FlowObject fobj = (FlowObject) mobj;
+                equations += "-" + fobj.getFlowEquation();// if it is flow th  en add the equation
             }
-        
+
         }
 
         jTextFieldStockEquation1.setText(equations);
@@ -80,9 +79,12 @@ public class StockDialog extends javax.swing.JDialog {
             variableText = variableText + " " + vs + ",";
 
         }
-        StringBuilder nameBuilder = new StringBuilder(variableText);
-        nameBuilder.deleteCharAt(nameBuilder.length() - 1);
-        jTextFieldStockVariables3.setText(nameBuilder.toString());
+
+        if (variableText.length() > 1) {
+            StringBuilder nameBuilder = new StringBuilder(variableText);
+            nameBuilder.deleteCharAt(nameBuilder.length() - 1);
+            jTextFieldStockVariables3.setText(nameBuilder.toString());
+        }
 
     }
 
